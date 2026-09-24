@@ -725,18 +725,14 @@ body {
 }
 
 .description {
-  color: #9aa0b4;
+  color: #4f556b;
 
   font-family: "Segoe UI", system-ui, sans-serif;
-  font-size: 12px;
-  line-height: 1.5;
+  font-size: 14px;
+  line-height: 1.6;
+  font-weight: 500;
 
-  margin: 0 0 10px;
-
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
+  margin: 0 0 12px;
 }
 
 /* ========================================
