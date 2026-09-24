@@ -5,8 +5,8 @@ spring:
   application:
     name: order-service
   datasource:
-    url: jdbc:postgresql://localhost:5432/orderdb
-    username: postgres
+    url: jdbc:postgresql://dpg-dapro5rtqb8s73dilihg-a.oregon-postgres.render.com:5432/orderdb?sslmode=require
+    username: microservices_db_mbzb_user
     password: ${DB_PASSWORD}
   jpa:
     hibernate:
@@ -16,4 +16,4 @@ spring:
 eureka:
   client:
     service-url:
-      defaultZone: http://localhost:8761/eureka
+      defaultZone: ${EUREKA_URL:http://localhost:8761/eureka}
