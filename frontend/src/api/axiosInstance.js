@@ -1,8 +1,7 @@
 import axios from 'axios';
 
-// Sab requests API Gateway (port 8080) ko jaati hain.
 const axiosInstance = axios.create({
-  baseURL: 'http://localhost:8080',
+  baseURL: import.meta.env.VITE_API_URL,
   headers: {
     'Content-Type': 'application/json',
   },
