@@ -143,6 +143,7 @@ function AdminPanel() {
           value={description}
           onChange={(e) => setDescription(e.target.value)}
           rows={3}
+          required
         />
         <button type="submit">{editingId ? 'Update' : 'Add'}</button>
         {editingId && (
