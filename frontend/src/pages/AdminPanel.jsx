@@ -13,6 +13,8 @@ function AdminPanel() {
   const [price, setPrice] = useState('');
   const [imageUrl, setImageUrl] = useState('');
   const [editingId, setEditingId] = useState(null);
+  const [category, setCategory] = useState('');
+  const [description, setDescription] = useState('');
 
   const fetchProducts = async () => {
     try {
@@ -41,12 +43,20 @@ function AdminPanel() {
     setName('');
     setPrice('');
     setImageUrl('');
+    setCategory('');
+    setDescription('');
     setEditingId(null);
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const payload = { name, price: parseFloat(price), imageUrl };
+    const payload = {
+      name,
+      price: parseFloat(price),
+      imageUrl,
+      category,
+      description,
+    };
     try {
       if (editingId) {
         await axiosInstance.put(`/products/${editingId}`, payload);
@@ -56,7 +66,7 @@ function AdminPanel() {
       resetForm();
       fetchProducts();
     } catch (err) {
-      setError('Product save nahi hua — imageUrl field backend mein abhi support nahi ho sakta.');
+      setError('Product save nahi hua.');
     }
   };
 
@@ -65,6 +75,8 @@ function AdminPanel() {
     setName(product.name);
     setPrice(product.price);
     setImageUrl(product.imageUrl || '');
+    setCategory(product.category || '');
+    setDescription(product.description || '');
   };
 
   const handleDeleteProduct = async (id) => {
@@ -87,7 +99,6 @@ function AdminPanel() {
     }
   };
 
-  // Role-protection: sirf ADMIN yahan aa sakta hai, baaki sab home pe redirect.
   if (role !== 'ADMIN') {
     return <Navigate to="/" replace />;
   }
@@ -119,6 +130,20 @@ function AdminPanel() {
           value={imageUrl}
           onChange={(e) => setImageUrl(e.target.value)}
         />
+        <input
+          type="text"
+          placeholder="Category (e.g. Laptop, Mobile)"
+          value={category}
+          onChange={(e) => setCategory(e.target.value)}
+          required
+        />
+        <textarea
+          placeholder="Product description"
+          value={description}
+          onChange={(e) => setDescription(e.target.value)}
+          rows={3}
+          required
+        />
         <button type="submit">{editingId ? 'Update' : 'Add'}</button>
         {editingId && (
           <button type="button" className="btn-outline" onClick={resetForm}>
@@ -133,6 +158,7 @@ function AdminPanel() {
           <tr>
             <th>ID</th>
             <th>Name</th>
+            <th>Category</th>
             <th>Price</th>
             <th></th>
           </tr>
@@ -142,6 +168,7 @@ function AdminPanel() {
             <tr key={p.id}>
               <td>{p.id}</td>
               <td>{p.name}</td>
+              <td>{p.category}</td>
               <td>₹{p.price}</td>
               <td className="action-cell">
                 <button className="link-btn" onClick={() => handleEdit(p)}>Edit</button>

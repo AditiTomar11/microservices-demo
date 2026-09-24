@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react';
 import axiosInstance from '../api/axiosInstance';
 
-
 const PLACEHOLDER_IMAGE =
   'https://via.placeholder.com/300x220?text=Product';
 
@@ -9,6 +8,7 @@ function Home() {
   const [products, setProducts] = useState([]);
   const [error, setError] = useState('');
   const [message, setMessage] = useState('');
+  const [activeCategory, setActiveCategory] = useState('All');
 
   const isLoggedIn = !!localStorage.getItem('token');
   const username = localStorage.getItem('username');
@@ -31,13 +31,12 @@ function Home() {
 
   const handleAddToCart = () => {
     setMessage('Cart feature is not available.');
-
     setTimeout(() => setMessage(''), 2000);
   };
+
   const handleBuyNow = async (product) => {
     if (!isLoggedIn) {
       setMessage('First Login,then order is getting placed');
-
       setTimeout(() => setMessage(''), 2500);
       return;
     }
@@ -59,6 +58,17 @@ function Home() {
     setTimeout(() => setMessage(''), 3000);
   };
 
+  // Category list: "All" + unique categories from products
+  const categories = [
+    'All',
+    ...new Set(products.map((p) => p.category).filter(Boolean)),
+  ];
+
+  const filteredProducts =
+    activeCategory === 'All'
+      ? products
+      : products.filter((p) => p.category === activeCategory);
+
   return (
     <div className="page">
       <div className="decorative-bg"></div>
@@ -72,13 +82,11 @@ function Home() {
         className="soft-glow"
         style={{ bottom: '100px', left: '5%' }}
       ></div>
+
       {/* Hero Section */}
       <section className="hero-section">
-
         <div className="hero-content">
-          <span className="hero-badge">
-            ✦ Fresh Collection
-          </span>
+          <span className="hero-badge">✦ Fresh Collection</span>
 
           <h1>
             Shop the
@@ -86,7 +94,7 @@ function Home() {
           </h1>
 
           <p>
-            Discover quality products at simple prices.
+            Discover quality tech products at simple prices.
             Find something you love and get it delivered with ease.
           </p>
 
@@ -94,22 +102,12 @@ function Home() {
             <a href="#products" className="hero-btn">
               Explore Products
             </a>
-
-            <span className="hero-note">
-              Simple. Fast. Reliable.
-            </span>
+            <span className="hero-note">Simple. Fast. Reliable.</span>
           </div>
         </div>
 
         <div className="hero-graphic">
-
-          <video
-            className="hero-video"
-            autoPlay
-            muted
-            loop
-            playsInline
-          >
+          <video className="hero-video" autoPlay muted loop playsInline>
             <source src="/hero.mp4" type="video/mp4" />
           </video>
 
@@ -128,14 +126,11 @@ function Home() {
               <small>Shopping</small>
             </div>
           </div>
-
         </div>
-
       </section>
+
       {error && <p className="error">{error}</p>}
-
       {message && <p className="toast">{message}</p>}
-
 
       {/* Products */}
       <section id="products">
@@ -144,12 +139,28 @@ function Home() {
             <span className="section-label">OUR COLLECTION</span>
             <h2>Featured Products</h2>
           </div>
-
-          <p>Explore our latest products.</p>
+          <p>Explore our latest tech products.</p>
         </div>
 
+        {/* Category filter bar */}
+        {categories.length > 1 && (
+          <div className="category-filter-bar">
+            {categories.map((cat) => (
+              <button
+                key={cat}
+                className={`category-chip ${
+                  activeCategory === cat ? 'active' : ''
+                }`}
+                onClick={() => setActiveCategory(cat)}
+              >
+                {cat}
+              </button>
+            ))}
+          </div>
+        )}
+
         <div className="product-grid">
-          {products.map((p) => (
+          {filteredProducts.map((p) => (
             <div className="product-card" key={p.id}>
               <img
                 src={p.imageUrl || PLACEHOLDER_IMAGE}
@@ -161,17 +172,20 @@ function Home() {
               />
 
               <div className="product-info">
+                {p.category && (
+                  <span className="category-tag">{p.category}</span>
+                )}
+
                 <h3>{p.name}</h3>
 
-                <p className="price">
-                  ₹{p.price}
-                </p>
+                {p.description && (
+                  <p className="description">{p.description}</p>
+                )}
+
+                <p className="price">₹{p.price}</p>
 
                 <div className="product-actions">
-                  <button
-                    className="btn-outline"
-                    onClick={handleAddToCart}
-                  >
+                  <button className="btn-outline" onClick={handleAddToCart}>
                     Add to Cart
                   </button>
 
@@ -188,10 +202,8 @@ function Home() {
         </div>
       </section>
 
-      {products.length === 0 && !error && (
-        <p className="empty-state">
-          Koi products nahi mile abhi.
-        </p>
+      {filteredProducts.length === 0 && !error && (
+        <p className="empty-state">Koi products nahi mile abhi.</p>
       )}
     </div>
   );
