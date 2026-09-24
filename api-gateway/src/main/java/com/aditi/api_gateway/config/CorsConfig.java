@@ -12,7 +12,7 @@ public class CorsConfig {
     @Bean
     public CorsWebFilter corsWebFilter() {
         CorsConfiguration corsConfig = new CorsConfiguration();
-        corsConfig.setAllowedOrigins(java.util.List.of("http://localhost:5173"));
+        corsConfig.setAllowedOrigins(java.util.List.of("http://localhost:5173","https://microservices-demo-six.vercel.app"));
         corsConfig.setAllowedMethods(java.util.List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         corsConfig.setAllowedHeaders(java.util.List.of("*"));
         corsConfig.setAllowCredentials(true);
