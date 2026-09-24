@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import axiosInstance from '../api/axiosInstance';
-import heroVideo from '../utils/hero.mp4';
+
 
 const PLACEHOLDER_IMAGE =
   'https://via.placeholder.com/300x220?text=Product';
@@ -110,7 +110,7 @@ function Home() {
             loop
             playsInline
           >
-            <source src={heroVideo} type="video/mp4" />
+            <source src="/hero.mp4" type="video/mp4" />
           </video>
 
           <div className="graphic-card graphic-card-one">
