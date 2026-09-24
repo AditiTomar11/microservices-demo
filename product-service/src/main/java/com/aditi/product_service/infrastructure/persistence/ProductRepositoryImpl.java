@@ -21,21 +21,33 @@ public class ProductRepositoryImpl implements ProductRepository {
 
     @Override
     public Product save(Product product) {
-        ProductEntity entity = new ProductEntity(product.getId(), product.getName(), product.getPrice(), product.getImageUrl());
+        ProductEntity entity = new ProductEntity(
+                product.getId(), product.getName(), product.getPrice(),
+                product.getImageUrl(), product.getCategory(), product.getDescription()
+        );
         ProductEntity saved = jpaRepository.save(entity);
-        return new Product(saved.getId(), saved.getName(), saved.getPrice(), saved.getImageUrl());
+        return new Product(
+                saved.getId(), saved.getName(), saved.getPrice(),
+                saved.getImageUrl(), saved.getCategory(), saved.getDescription()
+        );
     }
 
     @Override
     public Optional<Product> findById(Long id) {
         return jpaRepository.findById(id)
-                .map(e -> new Product(e.getId(), e.getName(), e.getPrice(), e.getImageUrl()));
+                .map(e -> new Product(
+                        e.getId(), e.getName(), e.getPrice(),
+                        e.getImageUrl(), e.getCategory(), e.getDescription()
+                ));
     }
 
     @Override
     public List<Product> findAll() {
         return jpaRepository.findAll().stream()
-                .map(e -> new Product(e.getId(), e.getName(), e.getPrice(), e.getImageUrl()))
+                .map(e -> new Product(
+                        e.getId(), e.getName(), e.getPrice(),
+                        e.getImageUrl(), e.getCategory(), e.getDescription()
+                ))
                 .collect(Collectors.toList());
     }
 
@@ -51,7 +63,12 @@ public class ProductRepositoryImpl implements ProductRepository {
         entity.setName(product.getName());
         entity.setPrice(product.getPrice());
         entity.setImageUrl(product.getImageUrl());
+        entity.setCategory(product.getCategory());
+        entity.setDescription(product.getDescription());
         ProductEntity updated = jpaRepository.save(entity);
-        return new Product(updated.getId(), updated.getName(), updated.getPrice(), updated.getImageUrl());
+        return new Product(
+                updated.getId(), updated.getName(), updated.getPrice(),
+                updated.getImageUrl(), updated.getCategory(), updated.getDescription()
+        );
     }
 }
