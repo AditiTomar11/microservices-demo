@@ -10,15 +10,15 @@ spring:
         webflux:
           routes:
             - id: product-route
-              uri: lb://product-service
+              uri: https://microservices-demo-product.onrender.com
               predicates:
                 - Path=/products/**
             - id: order-route
-              uri: lb://order-service
+              uri: https://microservices-demo-order.onrender.com
               predicates:
                 - Path=/orders/**
             - id: auth-route
-              uri: lb://auth-service
+              uri: https://microservices-demo-1-a497.onrender.com
               predicates:
                 - Path=/auth/**
 
