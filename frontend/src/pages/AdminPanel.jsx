@@ -137,12 +137,12 @@ function AdminPanel() {
           onChange={(e) => setCategory(e.target.value)}
           required
         />
-        <textarea
+        <input
+          type="text"
           placeholder="Product description"
           value={description}
           onChange={(e) => setDescription(e.target.value)}
           rows={3}
-          required
         />
         <button type="submit">{editingId ? 'Update' : 'Add'}</button>
         {editingId && (
