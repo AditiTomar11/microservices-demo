@@ -1998,3 +1998,145 @@ td {
     padding: 30px 24px;
   }
 }
+/* ========================================
+   HERO SEARCH BAR
+======================================== */
+
+.hero-search {
+  position: relative;
+  max-width: 420px;
+  margin-bottom: 22px;
+}
+
+.hero-search input {
+  width: 100%;
+  padding: 12px 42px 12px 16px;
+
+  border-radius: 8px;
+  border: 1px solid #333850;
+  background: rgba(28, 32, 48, 0.6);
+
+  color: #e6e6e6;
+  font-family: "Segoe UI", system-ui, sans-serif;
+  font-size: 14px;
+
+  outline: none;
+  transition: border-color 0.2s ease;
+}
+
+.hero-search input::placeholder {
+  color: #7f89ad;
+}
+
+.hero-search input:focus {
+  border-color: #5865f2;
+}
+
+.hero-search__icon {
+  position: absolute;
+  right: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+
+  color: #7f89ad;
+  font-size: 16px;
+  pointer-events: none;
+}
+
+
+/* ========================================
+   WISHLIST BUTTON
+======================================== */
+
+.wishlist-btn {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  z-index: 3;
+
+  width: 32px;
+  height: 32px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 50%;
+  border: none;
+  background: rgba(21, 21, 26, 0.55);
+  backdrop-filter: blur(4px);
+
+  color: #cfd3e6;
+  font-size: 16px;
+
+  cursor: pointer;
+  transition: transform 0.15s ease, color 0.15s ease;
+}
+
+.wishlist-btn:hover {
+  transform: scale(1.12);
+}
+
+.wishlist-btn.active {
+  color: #e5484d;
+}
+
+/* product-card needs relative positioning for the badge to anchor */
+.product-card {
+  position: relative;
+}
+
+
+/* ========================================
+   PRICE FILTER
+======================================== */
+
+.price-filter {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+
+  max-width: 320px;
+  margin-bottom: 24px;
+}
+
+.price-filter label {
+  color: #cfd3e6;
+  font-family: "Segoe UI", system-ui, sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.price-filter input[type="range"] {
+  -webkit-appearance: none;
+  width: 100%;
+  height: 4px;
+
+  border-radius: 4px;
+  background: #333850;
+  outline: none;
+}
+
+.price-filter input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+
+  width: 16px;
+  height: 16px;
+
+  border-radius: 50%;
+  background: #5865f2;
+  cursor: pointer;
+
+  border: 2px solid #ffffff;
+}
+
+.price-filter input[type="range"]::-moz-range-thumb {
+  width: 16px;
+  height: 16px;
+
+  border-radius: 50%;
+  background: #5865f2;
+  cursor: pointer;
+
+  border: 2px solid #ffffff;
+}
