@@ -184,8 +184,9 @@ function AdminPanel() {
         <thead>
           <tr>
             <th>ID</th>
-            <th>Product ID</th>
+            <th>Product</th>
             <th>Quantity</th>
+            <th>Status</th>
             <th></th>
           </tr>
         </thead>
@@ -193,8 +194,9 @@ function AdminPanel() {
           {orders.map((o) => (
             <tr key={o.id}>
               <td>{o.id}</td>
-              <td>{o.productId}</td>
+              <td>{o.productName}</td>
               <td>{o.quantity}</td>
+              <td>{o.status}</td>
               <td className="action-cell">
                 <button className="delete-btn" onClick={() => handleDeleteOrder(o.id)}>Delete</button>
               </td>
