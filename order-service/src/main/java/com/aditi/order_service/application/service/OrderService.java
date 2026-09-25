@@ -7,6 +7,7 @@ import com.aditi.order_service.infrastructure.client.ProductClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class OrderService {
@@ -22,7 +23,19 @@ public class OrderService {
 
     public Order createOrder(Order order) {
         Product product = productClient.getProductById(order.getProductId());
-        System.out.println("Ordering product: " + product.getName());
+
+        Optional<Order> existing = orderRepository.findByUsernameAndProductIdAndStatus(
+                order.getUsername(), order.getProductId(), "PENDING"
+        );
+
+        if (existing.isPresent()) {
+            Order existingOrder = existing.get();
+            existingOrder.setQuantity(existingOrder.getQuantity() + order.getQuantity());
+            return orderRepository.update(existingOrder.getId(), existingOrder);
+        }
+
+        order.setProductName(product.getName());
+        order.setStatus("PENDING");
         return orderRepository.save(order);
     }
 

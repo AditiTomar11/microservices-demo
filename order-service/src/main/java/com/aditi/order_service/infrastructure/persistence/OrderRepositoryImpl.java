@@ -21,21 +21,23 @@ public class OrderRepositoryImpl implements OrderRepository {
 
     @Override
     public Order save(Order order) {
-        OrderEntity entity = new OrderEntity(order.getId(), order.getProductId(), order.getQuantity(), order.getUsername());
+        OrderEntity entity = new OrderEntity(
+                order.getId(), order.getProductId(), order.getProductName(),
+                order.getQuantity(), order.getUsername(), order.getStatus()
+        );
         OrderEntity saved = jpaRepository.save(entity);
-        return new Order(saved.getId(), saved.getProductId(), saved.getQuantity(), saved.getUsername());
+        return toDomain(saved);
     }
 
     @Override
     public Optional<Order> findById(Long id) {
-        return jpaRepository.findById(id)
-                .map(e -> new Order(e.getId(), e.getProductId(), e.getQuantity(), e.getUsername()));
+        return jpaRepository.findById(id).map(this::toDomain);
     }
 
     @Override
     public List<Order> findAll() {
         return jpaRepository.findAll().stream()
-                .map(e -> new Order(e.getId(), e.getProductId(), e.getQuantity(), e.getUsername()))
+                .map(this::toDomain)
                 .collect(Collectors.toList());
     }
 
@@ -49,9 +51,21 @@ public class OrderRepositoryImpl implements OrderRepository {
         OrderEntity entity = jpaRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Order not found with id " + id));
         entity.setProductId(order.getProductId());
+        entity.setProductName(order.getProductName());
         entity.setQuantity(order.getQuantity());
         entity.setUsername(order.getUsername());
+        entity.setStatus(order.getStatus());
         OrderEntity updated = jpaRepository.save(entity);
-        return new Order(updated.getId(), updated.getProductId(), updated.getQuantity(), updated.getUsername());
+        return toDomain(updated);
+    }
+
+    @Override
+    public Optional<Order> findByUsernameAndProductIdAndStatus(String username, Long productId, String status) {
+        return jpaRepository.findByUsernameAndProductIdAndStatus(username, productId, status)
+                .map(this::toDomain);
+    }
+
+    private Order toDomain(OrderEntity e) {
+        return new Order(e.getId(), e.getProductId(), e.getProductName(), e.getQuantity(), e.getUsername(), e.getStatus());
     }
 }
