@@ -137,8 +137,7 @@ function AdminPanel() {
           onChange={(e) => setCategory(e.target.value)}
           required
         />
-        <input
-          type="text"
+        <textarea
           placeholder="Product description"
           value={description}
           onChange={(e) => setDescription(e.target.value)}
