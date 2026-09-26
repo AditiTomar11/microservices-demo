@@ -1,6 +1,6 @@
-import { useState } from 'react';
-import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { ShoppingBag, Heart, User, LogOut, Shield, Cpu, Menu, X } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { Link, NavLink, useNavigate, useLocation } from 'react-router-dom';
+import { ShoppingCart, Heart, Menu, X } from 'lucide-react';
 
 export default function Navbar({
   cartCount = 0,
@@ -11,150 +11,137 @@ export default function Navbar({
   const navigate = useNavigate();
   const location = useLocation();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
 
   const token = localStorage.getItem('token');
   const role = localStorage.getItem('role');
   const username = localStorage.getItem('username');
 
+  // The header sits on top of the hero photo on the home page and turns solid once
+  // the visitor scrolls (or on any other page).
+  const overlay = location.pathname === '/';
+
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 24);
+    onScroll();
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
+  }, []);
+
+  useEffect(() => {
+    setMobileMenuOpen(false);
+  }, [location.pathname]);
+
   const handleLogout = () => {
     localStorage.removeItem('token');
     localStorage.removeItem('username');
     localStorage.removeItem('role');
+    setMobileMenuOpen(false);
     navigate('/login');
   };
 
-  const isActive = (path) => location.pathname === path;
+  // "Shop" scrolls to the catalog when we're already on the home page, otherwise
+  // it navigates home and lets Home scroll once the products have loaded.
+  const goToShop = (e) => {
+    e.preventDefault();
+    setMobileMenuOpen(false);
+    if (location.pathname === '/') {
+      document.getElementById('products')?.scrollIntoView({ behavior: 'smooth' });
+    } else {
+      navigate({ pathname: '/', hash: '#products' });
+    }
+  };
+
+  const linkClass = ({ isActive }) => `nav-link${isActive ? ' is-active' : ''}`;
 
   return (
-    <header className="navbar-3d-wrapper">
-      <nav className="navbar-3d glass-panel-3d">
-        {/* Brand Logo */}
-        <Link to="/" className="brand-logo-3d">
-          <div className="logo-icon-box">
-            <Cpu size={22} className="logo-cpu-icon" />
-          </div>
-          <span className="brand-text">
-            Shop<span className="brand-accent">Ease</span>
-          </span>
-          <span className="brand-beta-tag">3D HUD</span>
+    <header
+      className={`site-header${overlay ? ' is-overlay' : ''}${scrolled ? ' is-scrolled' : ''}${
+        mobileMenuOpen ? ' menu-open' : ''
+      }`}
+    >
+      <nav className="site-nav container-wide" aria-label="Primary">
+        <Link to="/" className="brand">
+          Shop<span>Ease</span>
         </Link>
 
-        {/* Desktop Nav Links */}
-        <div className="nav-links-3d">
-          <Link to="/" className={`nav-item ${isActive('/') ? 'active' : ''}`}>
-            Home
-          </Link>
-          <a href="/#products" className="nav-item">
-            Shop Catalog
+        <div className="nav-links">
+          <a href="/#products" className="nav-link" onClick={goToShop}>
+            Shop
           </a>
-          <Link to="/about" className={`nav-item ${isActive('/about') ? 'active' : ''}`}>
-            About
-          </Link>
-
+          <NavLink to="/about" className={linkClass}>
+            Our Story
+          </NavLink>
           {role === 'ADMIN' && (
-            <Link to="/admin" className={`nav-item admin-link ${isActive('/admin') ? 'active' : ''}`}>
-              <Shield size={14} />
-              <span>Admin Center</span>
-            </Link>
+            <NavLink to="/admin" className={linkClass}>
+              Admin
+            </NavLink>
           )}
         </div>
 
-        {/* Right Actions */}
-        <div className="nav-actions-3d">
-          {/* Wishlist Button */}
-          <button
-            className="nav-icon-badge-btn"
-            title="Wishlist"
-            onClick={onOpenWishlist}
-          >
-            <Heart size={18} />
-            {wishlistCount > 0 && (
-              <span className="badge-count count-red">{wishlistCount}</span>
-            )}
-          </button>
-
-          {/* Cart Button */}
-          <button
-            className="nav-icon-badge-btn"
-            title="Shopping Cart"
-            onClick={onOpenCart}
-          >
-            <ShoppingBag size={18} />
-            {cartCount > 0 && (
-              <span className="badge-count count-blue">{cartCount}</span>
-            )}
-          </button>
-
-          {/* Auth Controls */}
+        <div className="nav-actions">
           {token ? (
-            <div className="user-profile-pill">
-              <div className="user-avatar-dot">
-                <User size={14} />
-              </div>
-              <span className="username-display">{username}</span>
-              <button
-                className="logout-icon-btn"
-                title="Logout"
-                onClick={handleLogout}
-              >
-                <LogOut size={16} />
+            <div className="nav-user">
+              <span className="nav-user-name">{username}</span>
+              <button type="button" className="nav-link" onClick={handleLogout}>
+                Logout
               </button>
             </div>
           ) : (
-            <div className="auth-btn-group">
-              <Link to="/login" className="btn-cyber-outline btn-sm">
-                Login
-              </Link>
-              <Link to="/register" className="btn-cyber-solid btn-sm">
-                Register
-              </Link>
-            </div>
+            <NavLink to="/login" className={linkClass}>
+              Login
+            </NavLink>
           )}
 
-          {/* Mobile Menu Toggle */}
           <button
-            className="mobile-hamburger-btn"
-            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            type="button"
+            className="nav-icon-btn"
+            onClick={onOpenWishlist}
+            aria-label={`Wishlist, ${wishlistCount} items`}
           >
-            {mobileMenuOpen ? <X size={22} /> : <Menu size={22} />}
+            <Heart size={20} strokeWidth={1.5} />
+            {wishlistCount > 0 && <span className="nav-badge">{wishlistCount}</span>}
+          </button>
+
+          <button
+            type="button"
+            className="nav-icon-btn nav-cart"
+            onClick={onOpenCart}
+            aria-label={`Cart, ${cartCount} items`}
+          >
+            <ShoppingCart size={20} strokeWidth={1.5} />
+            <span className="nav-cart-count">{cartCount}</span>
+          </button>
+
+          <button
+            type="button"
+            className="nav-menu-btn"
+            onClick={() => setMobileMenuOpen((open) => !open)}
+            aria-label={mobileMenuOpen ? 'Close menu' : 'Open menu'}
+            aria-expanded={mobileMenuOpen}
+          >
+            {mobileMenuOpen ? <X size={22} strokeWidth={1.5} /> : <Menu size={22} strokeWidth={1.5} />}
           </button>
         </div>
       </nav>
 
-      {/* Mobile Drawer Menu */}
       {mobileMenuOpen && (
-        <div className="mobile-menu-overlay glass-panel-3d" onClick={() => setMobileMenuOpen(false)}>
-          <div className="mobile-menu-links">
-            <Link to="/" onClick={() => setMobileMenuOpen(false)}>
-              Home
-            </Link>
-            <a href="/#products" onClick={() => setMobileMenuOpen(false)}>
-              Shop Catalog
-            </a>
-            <Link to="/about" onClick={() => setMobileMenuOpen(false)}>
-              About
-            </Link>
-            {role === 'ADMIN' && (
-              <Link to="/admin" onClick={() => setMobileMenuOpen(false)}>
-                Admin Center
-              </Link>
-            )}
-
-            {token ? (
-              <button className="btn-cyber-outline full-width" onClick={handleLogout}>
-                Logout ({username})
-              </button>
-            ) : (
-              <div className="mobile-auth-row">
-                <Link to="/login" className="btn-cyber-outline full-width" onClick={() => setMobileMenuOpen(false)}>
-                  Login
-                </Link>
-                <Link to="/register" className="btn-cyber-solid full-width" onClick={() => setMobileMenuOpen(false)}>
-                  Register
-                </Link>
-              </div>
-            )}
-          </div>
+        <div className="mobile-menu">
+          <a href="/#products" onClick={goToShop}>
+            Shop
+          </a>
+          <Link to="/about">Our Story</Link>
+          {role === 'ADMIN' && <Link to="/admin">Admin</Link>}
+          {token ? (
+            <button type="button" onClick={handleLogout}>
+              Logout ({username})
+            </button>
+          ) : (
+            <>
+              <Link to="/login">Login</Link>
+              <Link to="/register">Create account</Link>
+            </>
+          )}
         </div>
       )}
     </header>

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import Home from './pages/Home';
@@ -11,6 +11,15 @@ import CartDrawer from './components/CartDrawer';
 import WishlistDrawer from './components/WishlistDrawer';
 import ProductModal from './components/ProductModal';
 import axiosInstance from './api/axiosInstance';
+
+// Start every new route at the top of the page (hash links keep their target).
+function ScrollToTop() {
+  const { pathname, hash } = useLocation();
+  useEffect(() => {
+    if (!hash) window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
+  }, [pathname, hash]);
+  return null;
+}
 
 function App() {
   const [cartItems, setCartItems] = useState(() => {
@@ -82,7 +91,7 @@ function App() {
         return [...prev, { product, quantity: qty }];
       }
     });
-    showToast(`🛒 "${product.name}" added to cart!`);
+    showToast(`Added to cart — ${product.name}`);
   };
 
   const handleUpdateCartQuantity = (productId, newQty) => {
@@ -109,10 +118,10 @@ function App() {
   const handleToggleWishlist = (productId) => {
     setWishlistIds((prev) => {
       if (prev.includes(productId)) {
-        showToast('💔 Item removed from wishlist');
+        showToast('Removed from your wishlist');
         return prev.filter((id) => id !== productId);
       } else {
-        showToast('❤️ Item added to wishlist');
+        showToast('Saved to your wishlist');
         return [...prev, productId];
       }
     });
@@ -126,7 +135,7 @@ function App() {
     const username = localStorage.getItem('username');
 
     if (!isLoggedIn) {
-      showToast('⚠️ Please login first to place an order');
+      showToast('Please sign in to place an order');
       return;
     }
 
@@ -136,19 +145,19 @@ function App() {
         quantity: quantity,
         username: username,
       });
-      showToast(`⚡ Order placed for "${product.name}"!`);
+      showToast(`Order placed — ${product.name}`);
     } catch (err) {
-      showToast('❌ Order failed — backend service unavailable');
+      showToast('Order failed — the order service is unavailable');
     }
   };
 
   return (
-    <BrowserRouter>
-      <div className="app-3d-layout">
-        {/* Toast Floating Notification */}
+    <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
+      <ScrollToTop />
+      <div className="app-shell">
         {toastMessage && (
-          <div className="toast-notification-3d">
-            <span>{toastMessage}</span>
+          <div className="toast" role="status" aria-live="polite">
+            {toastMessage}
           </div>
         )}
 
@@ -159,7 +168,7 @@ function App() {
           onOpenWishlist={() => setIsWishlistOpen(true)}
         />
 
-        <main className="main-content-3d">
+        <main className="app-main">
           <Routes>
             <Route
               path="/"

@@ -2,8 +2,6 @@ import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import authApi from '../api/authApi';
 import { decodeToken } from '../utils/decodeToken';
-import ThreeCanvas from '../components/ThreeCanvas';
-import { Cpu, Lock, User, LogIn, ArrowRight, ShieldCheck } from 'lucide-react';
 
 export default function Login() {
   const [username, setUsername] = useState('');
@@ -35,89 +33,62 @@ export default function Login() {
         navigate('/');
       }
     } catch (err) {
-      setError('Authentication failed. Check your username and password.');
+      setError('We could not sign you in. Check your username and password.');
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="auth-page-3d">
-      <ThreeCanvas variant="auth" />
+    <div className="page auth-page">
+      <aside className="auth-visual" aria-hidden="true">
+        <blockquote>
+          <p>“Verified specs, honest prices, and a checkout that just works.”</p>
+          <cite>— The ShopEase promise</cite>
+        </blockquote>
+      </aside>
 
-      <div className="auth-card-3d glass-panel-3d">
-        <div className="auth-header-3d">
-          <div className="auth-logo-box">
-            <Cpu size={28} className="text-accent" />
-          </div>
-          <h2>Welcome Back</h2>
-          <p>Login to access your ShopEase account & orders</p>
-        </div>
+      <div className="auth-panel">
+        <div className="auth-card">
+          <span className="eyebrow">Account</span>
+          <h1 className="auth-title">Welcome back</h1>
+          <p className="auth-sub">Sign in to place orders and manage your account.</p>
 
-        {error && (
-          <div className="auth-alert-banner error">
-            <span>{error}</span>
-          </div>
-        )}
+          {error && <div className="notice notice-error">{error}</div>}
 
-        <form onSubmit={handleSubmit} className="auth-form-3d">
-          <div className="input-group-3d">
-            <label>Username</label>
-            <div className="input-with-icon">
-              <User size={18} className="input-icon" />
+          <form onSubmit={handleSubmit} className="form">
+            <label className="field">
+              <span>Username</span>
               <input
                 type="text"
-                placeholder="Enter your username"
+                autoComplete="username"
+                placeholder="Your username"
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
                 required
               />
-            </div>
-          </div>
+            </label>
 
-          <div className="input-group-3d">
-            <label>Password</label>
-            <div className="input-with-icon">
-              <Lock size={18} className="input-icon" />
+            <label className="field">
+              <span>Password</span>
               <input
                 type="password"
-                placeholder="Enter your password"
+                autoComplete="current-password"
+                placeholder="Your password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
               />
-            </div>
-          </div>
+            </label>
 
-          <button
-            type="submit"
-            className="btn-cyber-solid full-width lg-btn"
-            disabled={loading}
-          >
-            {loading ? (
-              <span>Authenticating...</span>
-            ) : (
-              <>
-                <LogIn size={18} />
-                <span>Login Access</span>
-                <ArrowRight size={18} />
-              </>
-            )}
-          </button>
-        </form>
+            <button type="submit" className="btn btn-dark btn-block btn-lg" disabled={loading}>
+              {loading ? 'Signing in…' : 'Sign In'}
+            </button>
+          </form>
 
-        <div className="auth-footer-3d">
-          <p>
-            Don&apos;t have an account?{' '}
-            <Link to="/register" className="auth-link">
-              Register here
-            </Link>
+          <p className="auth-alt">
+            New to ShopEase? <Link to="/register">Create an account</Link>
           </p>
-
-          <div className="auth-security-badge">
-            <ShieldCheck size={14} />
-            <span>JWT Stateless Token Authentication</span>
-          </div>
         </div>
       </div>
     </div>

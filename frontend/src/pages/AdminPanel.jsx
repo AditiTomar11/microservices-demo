@@ -1,7 +1,10 @@
 import { useEffect, useState, useMemo } from 'react';
 import { Navigate } from 'react-router-dom';
 import axiosInstance from '../api/axiosInstance';
-import { Shield, Plus, Edit3, Trash2, Package, ShoppingBag, DollarSign, Search, RefreshCw, Layers, CheckCircle2, AlertCircle } from 'lucide-react';
+import { Edit3, Trash2, Search, RefreshCw } from 'lucide-react';
+
+const PLACEHOLDER_IMAGE = 'https://images.unsplash.com/photo-1526738549149-8e07eca6c147?w=100';
+const ORDER_STATUSES = ['PENDING', 'PROCESSING', 'SHIPPED', 'DELIVERED', 'CANCELLED'];
 
 export default function AdminPanel() {
   const role = localStorage.getItem('role');
@@ -184,353 +187,322 @@ export default function AdminPanel() {
   }
 
   return (
-    <div className="admin-page-container">
-      {/* Header */}
-      <div className="admin-header-3d glass-panel-3d">
-        <div className="admin-title-box">
-          <div className="admin-shield-icon">
-            <Shield size={24} />
-          </div>
+    <div className="page admin-page">
+      <div className="container">
+        <header className="admin-head">
           <div>
-            <h2>Admin Command Center</h2>
-            <p>Manage product catalog, inventory, and microservice orders</p>
+            <span className="eyebrow">Admin</span>
+            <h1 className="page-title">Store Management</h1>
+            <p className="page-sub">Manage the catalog and keep orders moving.</p>
+          </div>
+          <button
+            type="button"
+            className="btn btn-outline btn-sm"
+            onClick={() => {
+              fetchProducts();
+              fetchOrders();
+            }}
+          >
+            <RefreshCw size={14} strokeWidth={1.5} />
+            <span>Refresh</span>
+          </button>
+        </header>
+
+        {success && <div className="notice notice-success">{success}</div>}
+        {error && <div className="notice notice-error">{error}</div>}
+
+        {/* Metrics */}
+        <div className="metrics-grid">
+          <div className="metric">
+            <span className="metric-label">Products</span>
+            <strong className="metric-value">{products.length}</strong>
+          </div>
+          <div className="metric">
+            <span className="metric-label">Orders</span>
+            <strong className="metric-value">{orders.length}</strong>
+          </div>
+          <div className="metric">
+            <span className="metric-label">Order value</span>
+            <strong className="metric-value">₹{totalRevenue.toLocaleString('en-IN')}</strong>
+          </div>
+          <div className="metric">
+            <span className="metric-label">Pending</span>
+            <strong className="metric-value">{pendingOrdersCount}</strong>
           </div>
         </div>
 
-        <button
-          className="btn-cyber-outline btn-sm"
-          onClick={() => {
-            fetchProducts();
-            fetchOrders();
-          }}
-        >
-          <RefreshCw size={14} />
-          <span>Sync Backend</span>
-        </button>
-      </div>
-
-      {/* Notifications */}
-      {success && (
-        <div className="admin-notification success">
-          <CheckCircle2 size={18} />
-          <span>{success}</span>
-        </div>
-      )}
-
-      {error && (
-        <div className="admin-notification error">
-          <AlertCircle size={18} />
-          <span>{error}</span>
-        </div>
-      )}
-
-      {/* Top HUD Metrics */}
-      <div className="admin-metrics-grid">
-        <div className="metric-card-3d glass-panel-3d">
-          <div className="metric-icon blue"><Package size={22} /></div>
-          <div>
-            <span className="metric-label">Total Catalog Products</span>
-            <h3 className="metric-value">{products.length}</h3>
+        {/* Product form */}
+        <section className="panel">
+          <div className="panel-head">
+            <h2>{editingId ? `Editing product #${editingId}` : 'Add a product'}</h2>
+            {editingId && (
+              <button type="button" className="btn-text" onClick={resetForm}>
+                Cancel
+              </button>
+            )}
           </div>
-        </div>
 
-        <div className="metric-card-3d glass-panel-3d">
-          <div className="metric-icon purple"><ShoppingBag size={22} /></div>
-          <div>
-            <span className="metric-label">Total System Orders</span>
-            <h3 className="metric-value">{orders.length}</h3>
-          </div>
-        </div>
+          <form onSubmit={handleSubmit} className="form">
+            <div className="form-grid">
+              <label className="field">
+                <span>Product name *</span>
+                <input
+                  type="text"
+                  placeholder="e.g. UltraBook Pro M3"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  required
+                />
+              </label>
 
-        <div className="metric-card-3d glass-panel-3d">
-          <div className="metric-icon cyan"><DollarSign size={22} /></div>
-          <div>
-            <span className="metric-label">Estimated Order Value</span>
-            <h3 className="metric-value">₹{totalRevenue.toLocaleString('en-IN')}</h3>
-          </div>
-        </div>
+              <label className="field">
+                <span>Price (₹) *</span>
+                <input
+                  type="number"
+                  step="0.01"
+                  placeholder="e.g. 89999"
+                  value={price}
+                  onChange={(e) => setPrice(e.target.value)}
+                  required
+                />
+              </label>
 
-        <div className="metric-card-3d glass-panel-3d">
-          <div className="metric-icon orange"><Layers size={22} /></div>
-          <div>
-            <span className="metric-label">Pending Orders</span>
-            <h3 className="metric-value">{pendingOrdersCount}</h3>
-          </div>
-        </div>
-      </div>
+              <label className="field">
+                <span>Category *</span>
+                <input
+                  type="text"
+                  placeholder="e.g. Laptop, Mobile, Audio"
+                  value={category}
+                  onChange={(e) => setCategory(e.target.value)}
+                  required
+                />
+              </label>
 
-      {/* Product Form Section */}
-      <div className="admin-form-section-3d glass-panel-3d">
-        <div className="form-header-row">
-          <h3>
-            {editingId ? <Edit3 size={18} className="text-accent" /> : <Plus size={18} className="text-accent" />}
-            <span>{editingId ? `Editing Product #${editingId}` : 'Add New Hardware Product'}</span>
-          </h3>
-          {editingId && (
-            <button className="btn-cyber-outline btn-xs" onClick={resetForm}>
-              Cancel Edit
-            </button>
-          )}
-        </div>
+              <label className="field">
+                <span>Image URL</span>
+                <input
+                  type="text"
+                  placeholder="https://…"
+                  value={imageUrl}
+                  onChange={(e) => setImageUrl(e.target.value)}
+                />
+              </label>
 
-        <form onSubmit={handleSubmit} className="admin-product-form">
-          <div className="form-inputs-grid">
-            <div className="form-input-group">
-              <label>Product Name *</label>
-              <input
-                type="text"
-                placeholder="e.g. UltraBook Pro M3"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                required
-              />
+              <label className="field field-full">
+                <span>Description / specifications *</span>
+                <textarea
+                  placeholder="Detailed hardware specifications and description…"
+                  value={description}
+                  onChange={(e) => setDescription(e.target.value)}
+                  rows={3}
+                  required
+                />
+              </label>
             </div>
 
-            <div className="form-input-group">
-              <label>Price (₹) *</label>
-              <input
-                type="number"
-                step="0.01"
-                placeholder="e.g. 89999"
-                value={price}
-                onChange={(e) => setPrice(e.target.value)}
-                required
-              />
+            <div className="form-actions">
+              <button type="submit" className="btn btn-dark">
+                {editingId ? 'Update Product' : 'Add Product'}
+              </button>
+            </div>
+          </form>
+        </section>
+
+        {/* Tabs */}
+        <div className="tabs" role="tablist">
+          <button
+            type="button"
+            role="tab"
+            aria-selected={activeTab === 'products'}
+            className={`tab${activeTab === 'products' ? ' is-active' : ''}`}
+            onClick={() => setActiveTab('products')}
+          >
+            Products <span>{products.length}</span>
+          </button>
+          <button
+            type="button"
+            role="tab"
+            aria-selected={activeTab === 'orders'}
+            className={`tab${activeTab === 'orders' ? ' is-active' : ''}`}
+            onClick={() => setActiveTab('orders')}
+          >
+            Orders <span>{orders.length}</span>
+          </button>
+        </div>
+
+        {/* Products table */}
+        {activeTab === 'products' && (
+          <section className="panel panel-flush">
+            <div className="table-toolbar">
+              <label className="search-field">
+                <Search size={16} strokeWidth={1.5} />
+                <input
+                  type="search"
+                  placeholder="Filter products…"
+                  value={productSearch}
+                  onChange={(e) => setProductSearch(e.target.value)}
+                />
+              </label>
             </div>
 
-            <div className="form-input-group">
-              <label>Category *</label>
-              <input
-                type="text"
-                placeholder="e.g. Laptop, Mobile, Audio"
-                value={category}
-                onChange={(e) => setCategory(e.target.value)}
-                required
-              />
-            </div>
-
-            <div className="form-input-group">
-              <label>Image URL (Optional)</label>
-              <input
-                type="text"
-                placeholder="https://images.unsplash.com/..."
-                value={imageUrl}
-                onChange={(e) => setImageUrl(e.target.value)}
-              />
-            </div>
-
-            <div className="form-input-group full-span">
-              <label>Full Specification / Description *</label>
-              <textarea
-                placeholder="Detailed hardware specifications and description..."
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
-                rows={3}
-                required
-              />
-            </div>
-          </div>
-
-          <div className="form-actions-bar">
-            <button type="submit" className="btn-cyber-solid">
-              {editingId ? 'Update Product' : 'Add Product to Catalog'}
-            </button>
-          </div>
-        </form>
-      </div>
-
-      {/* Tabs Switcher */}
-      <div className="admin-tabs-nav">
-        <button
-          className={`admin-tab-btn ${activeTab === 'products' ? 'active' : ''}`}
-          onClick={() => setActiveTab('products')}
-        >
-          <Package size={16} />
-          <span>Products Management ({products.length})</span>
-        </button>
-
-        <button
-          className={`admin-tab-btn ${activeTab === 'orders' ? 'active' : ''}`}
-          onClick={() => setActiveTab('orders')}
-        >
-          <ShoppingBag size={16} />
-          <span>Orders Management ({orders.length})</span>
-        </button>
-      </div>
-
-      {/* TAB 1: PRODUCTS TABLE */}
-      {activeTab === 'products' && (
-        <div className="admin-table-container glass-panel-3d">
-          <div className="table-top-bar">
-            <div className="table-search-box">
-              <Search size={16} className="search-icon" />
-              <input
-                type="text"
-                placeholder="Filter products..."
-                value={productSearch}
-                onChange={(e) => setProductSearch(e.target.value)}
-              />
-            </div>
-          </div>
-
-          {loadingProducts ? (
-            <div className="table-loading-box">Loading Products...</div>
-          ) : (
-            <div className="responsive-table-wrapper">
-              <table className="cyber-table">
-                <thead>
-                  <tr>
-                    <th>ID</th>
-                    <th>Image</th>
-                    <th>Name</th>
-                    <th>Category</th>
-                    <th>Price</th>
-                    <th>Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {filteredProducts.map((p) => (
-                    <tr key={p.id}>
-                      <td className="id-cell">#{p.id}</td>
-                      <td>
-                        <img
-                          src={
-                            p.imageUrl ||
-                            'https://images.unsplash.com/photo-1526738549149-8e07eca6c147?w=100'
-                          }
-                          alt={p.name}
-                          className="table-thumb-img"
-                        />
-                      </td>
-                      <td className="name-cell">
-                        <strong>{p.name}</strong>
-                        <p className="table-desc-preview">{p.description}</p>
-                      </td>
-                      <td>
-                        <span className="cyber-pill-tag sm">{p.category}</span>
-                      </td>
-                      <td className="price-cell">₹{Number(p.price).toLocaleString('en-IN')}</td>
-                      <td className="actions-cell">
-                        <button
-                          className="btn-action edit"
-                          onClick={() => handleEdit(p)}
-                          title="Edit Product"
-                        >
-                          <Edit3 size={14} />
-                          <span>Edit</span>
-                        </button>
-                        <button
-                          className="btn-action delete"
-                          onClick={() => handleDeleteProduct(p.id)}
-                          title="Delete Product"
-                        >
-                          <Trash2 size={14} />
-                          <span>Delete</span>
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
-
-                  {filteredProducts.length === 0 && (
+            {loadingProducts ? (
+              <div className="state-block">
+                <div className="spinner" />
+                <p>Loading products…</p>
+              </div>
+            ) : (
+              <div className="table-wrap">
+                <table className="data-table">
+                  <thead>
                     <tr>
-                      <td colSpan={6} className="empty-table-cell">
-                        No products match your search.
-                      </td>
+                      <th>ID</th>
+                      <th>Product</th>
+                      <th>Category</th>
+                      <th>Price</th>
+                      <th className="col-actions">Actions</th>
                     </tr>
-                  )}
-                </tbody>
-              </table>
+                  </thead>
+                  <tbody>
+                    {filteredProducts.map((p) => (
+                      <tr key={p.id}>
+                        <td className="cell-muted">#{p.id}</td>
+                        <td>
+                          <div className="cell-product">
+                            <img src={p.imageUrl || PLACEHOLDER_IMAGE} alt={p.name} />
+                            <div>
+                              <strong>{p.name}</strong>
+                              <p>{p.description}</p>
+                            </div>
+                          </div>
+                        </td>
+                        <td>
+                          <span className="pill">{p.category}</span>
+                        </td>
+                        <td className="cell-price">₹{Number(p.price).toLocaleString('en-IN')}</td>
+                        <td className="col-actions">
+                          <div className="row-actions">
+                            <button type="button" className="btn-text" onClick={() => handleEdit(p)}>
+                              <Edit3 size={14} strokeWidth={1.5} />
+                              <span>Edit</span>
+                            </button>
+                            <button
+                              type="button"
+                              className="btn-text btn-text-danger"
+                              onClick={() => handleDeleteProduct(p.id)}
+                            >
+                              <Trash2 size={14} strokeWidth={1.5} />
+                              <span>Delete</span>
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+
+                    {filteredProducts.length === 0 && (
+                      <tr>
+                        <td colSpan={5} className="cell-empty">
+                          No products match your search.
+                        </td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </section>
+        )}
+
+        {/* Orders table */}
+        {activeTab === 'orders' && (
+          <section className="panel panel-flush">
+            <div className="table-toolbar">
+              <label className="search-field">
+                <Search size={16} strokeWidth={1.5} />
+                <input
+                  type="search"
+                  placeholder="Filter orders by product or username…"
+                  value={orderSearch}
+                  onChange={(e) => setOrderSearch(e.target.value)}
+                />
+              </label>
             </div>
-          )}
-        </div>
-      )}
 
-      {/* TAB 2: ORDERS TABLE */}
-      {activeTab === 'orders' && (
-        <div className="admin-table-container glass-panel-3d">
-          <div className="table-top-bar">
-            <div className="table-search-box">
-              <Search size={16} className="search-icon" />
-              <input
-                type="text"
-                placeholder="Filter orders by product or username..."
-                value={orderSearch}
-                onChange={(e) => setOrderSearch(e.target.value)}
-              />
-            </div>
-          </div>
-
-          {loadingOrders ? (
-            <div className="table-loading-box">Loading Orders...</div>
-          ) : (
-            <div className="responsive-table-wrapper">
-              <table className="cyber-table">
-                <thead>
-                  <tr>
-                    <th>Order ID</th>
-                    <th>Product Name</th>
-                    <th>Quantity</th>
-                    <th>User</th>
-                    <th>Status</th>
-                    <th>Status Action</th>
-                    <th>Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {filteredOrders.map((o) => (
-                    <tr key={o.id}>
-                      <td className="id-cell">#{o.id}</td>
-                      <td className="name-cell">
-                        <strong>{o.productName || `Product #${o.productId}`}</strong>
-                      </td>
-                      <td className="qty-cell">{o.quantity}</td>
-                      <td className="user-cell">@{o.username || 'guest'}</td>
-                      <td>
-                        <span
-                          className={`order-status-pill ${(o.status || 'PENDING').toLowerCase()}`}
-                        >
-                          {o.status || 'PENDING'}
-                        </span>
-                      </td>
-                      <td>
-                        <select
-                          className="cyber-select sm"
-                          value={o.status || 'PENDING'}
-                          onChange={(e) => handleUpdateOrderStatus(o, e.target.value)}
-                        >
-                          <option value="PENDING">PENDING</option>
-                          <option value="PROCESSING">PROCESSING</option>
-                          <option value="SHIPPED">SHIPPED</option>
-                          <option value="DELIVERED">DELIVERED</option>
-                          <option value="CANCELLED">CANCELLED</option>
-                        </select>
-                      </td>
-                      <td className="actions-cell">
-                        <button
-                          className="btn-action delete"
-                          onClick={() => handleDeleteOrder(o.id)}
-                          title="Delete Order"
-                        >
-                          <Trash2 size={14} />
-                          <span>Delete</span>
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
-
-                  {filteredOrders.length === 0 && (
+            {loadingOrders ? (
+              <div className="state-block">
+                <div className="spinner" />
+                <p>Loading orders…</p>
+              </div>
+            ) : (
+              <div className="table-wrap">
+                <table className="data-table">
+                  <thead>
                     <tr>
-                      <td colSpan={7} className="empty-table-cell">
-                        No orders recorded yet.
-                      </td>
+                      <th>Order</th>
+                      <th>Product</th>
+                      <th>Qty</th>
+                      <th>Customer</th>
+                      <th>Status</th>
+                      <th>Update status</th>
+                      <th className="col-actions">Actions</th>
                     </tr>
-                  )}
-                </tbody>
-              </table>
-            </div>
-          )}
-        </div>
-      )}
+                  </thead>
+                  <tbody>
+                    {filteredOrders.map((o) => (
+                      <tr key={o.id}>
+                        <td className="cell-muted">#{o.id}</td>
+                        <td>
+                          <strong>{o.productName || `Product #${o.productId}`}</strong>
+                        </td>
+                        <td>{o.quantity}</td>
+                        <td>@{o.username || 'guest'}</td>
+                        <td>
+                          <span className={`status status-${(o.status || 'PENDING').toLowerCase()}`}>
+                            {o.status || 'PENDING'}
+                          </span>
+                        </td>
+                        <td>
+                          <label className="select-field select-sm">
+                            <select
+                              value={o.status || 'PENDING'}
+                              onChange={(e) => handleUpdateOrderStatus(o, e.target.value)}
+                            >
+                              {ORDER_STATUSES.map((s) => (
+                                <option key={s} value={s}>
+                                  {s}
+                                </option>
+                              ))}
+                            </select>
+                          </label>
+                        </td>
+                        <td className="col-actions">
+                          <div className="row-actions">
+                            <button
+                              type="button"
+                              className="btn-text btn-text-danger"
+                              onClick={() => handleDeleteOrder(o.id)}
+                            >
+                              <Trash2 size={14} strokeWidth={1.5} />
+                              <span>Delete</span>
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+
+                    {filteredOrders.length === 0 && (
+                      <tr>
+                        <td colSpan={7} className="cell-empty">
+                          No orders recorded yet.
+                        </td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </section>
+        )}
+      </div>
     </div>
   );
 }

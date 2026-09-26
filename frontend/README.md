@@ -1,8 +1,23 @@
 # ShopEase — Frontend
 
-React + Vite frontend: Navbar (Home/About/Shop/Register/Login),
-product grid with Add to Cart (dummy) + Buy Now (real order), Login/
-Register connected to `auth-service`, aur protected Admin Panel.
+React + Vite frontend: clean editorial storefront (Playfair Display +
+Inter, light palette). Navbar (Shop / Our Story / Login, + Admin for
+ADMIN role), full-bleed hero, product grid with Quick View, Cart drawer
+(real orders on checkout), Wishlist drawer, Buy Now, Login/Register
+connected to `auth-service`, aur protected Admin Panel.
+
+## Design system (src/index.css)
+
+- Fonts: **Playfair Display** (brand, headings, nav, buttons) +
+  **Inter** (body/UI) — Google Fonts link `index.html` mein hai.
+- Colours: CSS variables `--bg`, `--surface-alt`, `--text`, `--muted`,
+  `--line`, `--accent` (muted blue `#a9bce0`), `--ink`.
+- Buttons: `.btn` + `.btn-primary` / `.btn-dark` / `.btn-outline`,
+  sizes `.btn-sm` / `.btn-lg` / `.btn-block`. Flat, square corners.
+- Layout: `.container` (max 1240px), `.section`, `.section-head`,
+  `.product-grid` (4 → 3 → 2 columns responsive).
+- Hero photo `public/hero-desk.jpg`, story photo `public/about-story.jpg`
+  — replace karke apni photos laga sakti ho (same file name rakho).
 
 ## Chalane ka tarika
 
@@ -51,10 +66,17 @@ src/
 │   ├── axiosInstance.js    ← Gateway (8080) ke liye, JWT interceptor ke saath
 │   └── authApi.js          ← auth-service (8083) ke liye seedha
 ├── components/
-│   └── Navbar.jsx
+│   ├── Navbar.jsx           ← Fixed translucent header, mobile menu
+│   ├── Footer.jsx
+│   ├── ProductCard.jsx      ← Grid card: Quick View, wishlist, Add to Cart, Buy Now
+│   ├── ProductModal.jsx     ← Quick View dialog (qty stepper)
+│   ├── CartDrawer.jsx       ← Cart + checkout (POST /orders per item)
+│   └── WishlistDrawer.jsx
+├── hooks/
+│   └── useLockBodyScroll.js
 ├── pages/
-│   ├── Home.jsx             ← Product grid, Add to Cart (dummy), Buy Now (real)
-│   ├── About.jsx
+│   ├── Home.jsx             ← Hero, search/filter/sort, product grid, categories
+│   ├── About.jsx            ← "Our Story" page (+ AboutPage.css)
 │   ├── Login.jsx
 │   ├── Register.jsx
 │   └── AdminPanel.jsx      ← Protected: role !== 'ADMIN' toh home pe redirect

@@ -1,8 +1,6 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import authApi from '../api/authApi';
-import ThreeCanvas from '../components/ThreeCanvas';
-import { Cpu, Lock, User, UserPlus, ArrowRight, ShieldCheck, CheckCircle2 } from 'lucide-react';
 
 export default function Register() {
   const [username, setUsername] = useState('');
@@ -25,101 +23,68 @@ export default function Register() {
         role: 'CUSTOMER',
       });
 
-      setSuccess('Account created successfully! Redirecting to login...');
+      setSuccess('Your account is ready. Taking you to sign in…');
       setTimeout(() => {
         navigate('/login');
       }, 1500);
     } catch (err) {
-      setError('Registration failed. Username may already be taken.');
+      setError('Registration failed. That username may already be taken.');
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="auth-page-3d">
-      <ThreeCanvas variant="auth" />
+    <div className="page auth-page">
+      <aside className="auth-visual" aria-hidden="true">
+        <blockquote>
+          <p>“Every listing with the details that actually matter before you buy.”</p>
+          <cite>— The ShopEase promise</cite>
+        </blockquote>
+      </aside>
 
-      <div className="auth-card-3d glass-panel-3d">
-        <div className="auth-header-3d">
-          <div className="auth-logo-box">
-            <Cpu size={28} className="text-accent" />
-          </div>
-          <h2>Create Account</h2>
-          <p>Join ShopEase for fast order management & hardware deals</p>
-        </div>
+      <div className="auth-panel">
+        <div className="auth-card">
+          <span className="eyebrow">Account</span>
+          <h1 className="auth-title">Create an account</h1>
+          <p className="auth-sub">Save your wishlist and check out in seconds.</p>
 
-        {error && (
-          <div className="auth-alert-banner error">
-            <span>{error}</span>
-          </div>
-        )}
+          {error && <div className="notice notice-error">{error}</div>}
+          {success && <div className="notice notice-success">{success}</div>}
 
-        {success && (
-          <div className="auth-alert-banner success">
-            <CheckCircle2 size={16} />
-            <span>{success}</span>
-          </div>
-        )}
-
-        <form onSubmit={handleSubmit} className="auth-form-3d">
-          <div className="input-group-3d">
-            <label>Username</label>
-            <div className="input-with-icon">
-              <User size={18} className="input-icon" />
+          <form onSubmit={handleSubmit} className="form">
+            <label className="field">
+              <span>Username</span>
               <input
                 type="text"
-                placeholder="Choose a unique username"
+                autoComplete="username"
+                placeholder="Choose a username"
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
                 required
               />
-            </div>
-          </div>
+            </label>
 
-          <div className="input-group-3d">
-            <label>Password</label>
-            <div className="input-with-icon">
-              <Lock size={18} className="input-icon" />
+            <label className="field">
+              <span>Password</span>
               <input
                 type="password"
+                autoComplete="new-password"
                 placeholder="Create a strong password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
               />
-            </div>
-          </div>
+            </label>
 
-          <button
-            type="submit"
-            className="btn-cyber-solid full-width lg-btn"
-            disabled={loading}
-          >
-            {loading ? (
-              <span>Creating Account...</span>
-            ) : (
-              <>
-                <UserPlus size={18} />
-                <span>Register Account</span>
-                <ArrowRight size={18} />
-              </>
-            )}
-          </button>
-        </form>
+            <button type="submit" className="btn btn-dark btn-block btn-lg" disabled={loading}>
+              {loading ? 'Creating your account…' : 'Create Account'}
+            </button>
+          </form>
 
-        <div className="auth-footer-3d">
-          <p>
-            Already have an account?{' '}
-            <Link to="/login" className="auth-link">
-              Login here
-            </Link>
+          <p className="auth-alt">
+            Already have an account? <Link to="/login">Sign in</Link>
           </p>
-
-          <div className="auth-security-badge">
-            <ShieldCheck size={14} />
-            <span>BCrypt Hash Encrypted Passwords</span>
-          </div>
         </div>
       </div>
     </div>
