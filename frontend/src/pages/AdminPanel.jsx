@@ -186,7 +186,7 @@ export default function AdminPanel() {
   return (
     <div className="admin-page-container">
       {/* Header */}
-      <div className="admin-header-3d 3d-glass-panel">
+      <div className="admin-header-3d glass-panel-3d">
         <div className="admin-title-box">
           <div className="admin-shield-icon">
             <Shield size={24} />
@@ -226,7 +226,7 @@ export default function AdminPanel() {
 
       {/* Top HUD Metrics */}
       <div className="admin-metrics-grid">
-        <div className="metric-card-3d 3d-glass-panel">
+        <div className="metric-card-3d glass-panel-3d">
           <div className="metric-icon blue"><Package size={22} /></div>
           <div>
             <span className="metric-label">Total Catalog Products</span>
@@ -234,7 +234,7 @@ export default function AdminPanel() {
           </div>
         </div>
 
-        <div className="metric-card-3d 3d-glass-panel">
+        <div className="metric-card-3d glass-panel-3d">
           <div className="metric-icon purple"><ShoppingBag size={22} /></div>
           <div>
             <span className="metric-label">Total System Orders</span>
@@ -242,7 +242,7 @@ export default function AdminPanel() {
           </div>
         </div>
 
-        <div className="metric-card-3d 3d-glass-panel">
+        <div className="metric-card-3d glass-panel-3d">
           <div className="metric-icon cyan"><DollarSign size={22} /></div>
           <div>
             <span className="metric-label">Estimated Order Value</span>
@@ -250,7 +250,7 @@ export default function AdminPanel() {
           </div>
         </div>
 
-        <div className="metric-card-3d 3d-glass-panel">
+        <div className="metric-card-3d glass-panel-3d">
           <div className="metric-icon orange"><Layers size={22} /></div>
           <div>
             <span className="metric-label">Pending Orders</span>
@@ -260,7 +260,7 @@ export default function AdminPanel() {
       </div>
 
       {/* Product Form Section */}
-      <div className="admin-form-section-3d 3d-glass-panel">
+      <div className="admin-form-section-3d glass-panel-3d">
         <div className="form-header-row">
           <h3>
             {editingId ? <Edit3 size={18} className="text-accent" /> : <Plus size={18} className="text-accent" />}
@@ -360,7 +360,7 @@ export default function AdminPanel() {
 
       {/* TAB 1: PRODUCTS TABLE */}
       {activeTab === 'products' && (
-        <div className="admin-table-container 3d-glass-panel">
+        <div className="admin-table-container glass-panel-3d">
           <div className="table-top-bar">
             <div className="table-search-box">
               <Search size={16} className="search-icon" />
@@ -447,7 +447,7 @@ export default function AdminPanel() {
 
       {/* TAB 2: ORDERS TABLE */}
       {activeTab === 'orders' && (
-        <div className="admin-table-container 3d-glass-panel">
+        <div className="admin-table-container glass-panel-3d">
           <div className="table-top-bar">
             <div className="table-search-box">
               <Search size={16} className="search-icon" />

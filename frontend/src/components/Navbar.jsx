@@ -27,7 +27,7 @@ export default function Navbar({
 
   return (
     <header className="navbar-3d-wrapper">
-      <nav className="navbar-3d 3d-glass-panel">
+      <nav className="navbar-3d glass-panel-3d">
         {/* Brand Logo */}
         <Link to="/" className="brand-logo-3d">
           <div className="logo-icon-box">
@@ -123,7 +123,7 @@ export default function Navbar({
 
       {/* Mobile Drawer Menu */}
       {mobileMenuOpen && (
-        <div className="mobile-menu-overlay 3d-glass-panel" onClick={() => setMobileMenuOpen(false)}>
+        <div className="mobile-menu-overlay glass-panel-3d" onClick={() => setMobileMenuOpen(false)}>
           <div className="mobile-menu-links">
             <Link to="/" onClick={() => setMobileMenuOpen(false)}>
               Home

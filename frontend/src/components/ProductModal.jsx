@@ -19,7 +19,7 @@ export default function ProductModal({
   return (
     <div className="modal-overlay" onClick={onClose}>
       <div
-        className="product-modal-card 3d-glass-panel"
+        className="product-modal-card glass-panel-3d"
         onClick={(e) => e.stopPropagation()}
       >
         <button className="icon-close-btn modal-close-btn" onClick={onClose}>

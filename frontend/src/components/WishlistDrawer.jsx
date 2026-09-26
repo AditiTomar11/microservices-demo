@@ -12,7 +12,7 @@ export default function WishlistDrawer({
 
   return (
     <div className="drawer-overlay" onClick={onClose}>
-      <div className="drawer-content 3d-glass-panel" onClick={(e) => e.stopPropagation()}>
+      <div className="drawer-content glass-panel-3d" onClick={(e) => e.stopPropagation()}>
         {/* Header */}
         <div className="drawer-header">
           <div className="drawer-title">

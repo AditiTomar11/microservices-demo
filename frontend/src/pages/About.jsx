@@ -90,17 +90,17 @@ export default function AboutPage() {
           </p>
 
           <div className="about-stats-grid">
-            <div className="stat-card-3d 3d-glass-panel">
+            <div className="stat-card-3d glass-panel-3d">
               <Counter end={500} suffix="+" />
               <span className="stat-label">Hardware Listings</span>
             </div>
 
-            <div className="stat-card-3d 3d-glass-panel">
+            <div className="stat-card-3d glass-panel-3d">
               <Counter end={5} suffix="" />
               <span className="stat-label">Microservices</span>
             </div>
 
-            <div className="stat-card-3d 3d-glass-panel">
+            <div className="stat-card-3d glass-panel-3d">
               <Counter end={100} suffix="%" />
               <span className="stat-label">Verified Specs</span>
             </div>
@@ -117,35 +117,35 @@ export default function AboutPage() {
         </div>
 
         <div className="arch-nodes-grid">
-          <div className="arch-node-card 3d-glass-panel">
+          <div className="arch-node-card glass-panel-3d">
             <div className="node-icon-box"><Radio size={20} className="text-accent" /></div>
             <div className="node-port">Port 8761</div>
             <h3>eureka-server</h3>
             <p>Service Registry & Discovery hub where all microservices register dynamically.</p>
           </div>
 
-          <div className="arch-node-card 3d-glass-panel highlight">
+          <div className="arch-node-card glass-panel-3d highlight">
             <div className="node-icon-box"><Network size={20} className="text-cyan" /></div>
             <div className="node-port">Port 8080</div>
             <h3>api-gateway</h3>
             <p>Spring Cloud Gateway (WebFlux) entry point routing /products, /orders, /auth.</p>
           </div>
 
-          <div className="arch-node-card 3d-glass-panel">
+          <div className="arch-node-card glass-panel-3d">
             <div className="node-icon-box"><Cpu size={20} className="text-accent" /></div>
             <div className="node-port">Port 8081</div>
             <h3>product-service</h3>
             <p>Onion Architecture service managing catalog, categories, and full product text.</p>
           </div>
 
-          <div className="arch-node-card 3d-glass-panel">
+          <div className="arch-node-card glass-panel-3d">
             <div className="node-icon-box"><Zap size={20} className="text-orange" /></div>
             <div className="node-port">Port 8082</div>
             <h3>order-service</h3>
             <p>Onion Architecture order service with OpenFeign client & duplicate PENDING order merging.</p>
           </div>
 
-          <div className="arch-node-card 3d-glass-panel">
+          <div className="arch-node-card glass-panel-3d">
             <div className="node-icon-box"><ShieldCheck size={20} className="text-purple" /></div>
             <div className="node-port">Port 8083</div>
             <h3>auth-service</h3>
@@ -156,7 +156,7 @@ export default function AboutPage() {
 
       {/* Split Story */}
       <Reveal className="about-split-3d">
-        <div className="about-split-img-box 3d-glass-panel">
+        <div className="about-split-img-box glass-panel-3d">
           <img
             src="https://images.unsplash.com/photo-1518770660439-4636190af475?w=1000"
             alt="Electronics and gadgets"
@@ -201,7 +201,7 @@ export default function AboutPage() {
             },
           ].map((v, i) => (
             <Reveal key={v.title} delay={i * 120}>
-              <div className="value-card-3d 3d-glass-panel">
+              <div className="value-card-3d glass-panel-3d">
                 <div className="value-num">0{i + 1}</div>
                 <h3>{v.title}</h3>
                 <p>{v.text}</p>
@@ -213,7 +213,7 @@ export default function AboutPage() {
 
       {/* CTA */}
       <Reveal className="about-cta-section">
-        <div className="about-cta-inner 3d-glass-panel">
+        <div className="about-cta-inner glass-panel-3d">
           <h2>Looking for Your Next High-Tech Gadget?</h2>
           <p>Browse our catalog and experience microservice e-commerce in action.</p>
 

@@ -1,4 +1,4 @@
-import { Link } from 'react';
+import { Link } from 'react-router-dom';
 import { Cpu, ShieldCheck, Server, Radio, ArrowUp } from 'lucide-react';
 
 export default function Footer() {
@@ -8,7 +8,7 @@ export default function Footer() {
 
   return (
     <footer className="footer-3d-wrapper">
-      <div className="footer-container 3d-glass-panel">
+      <div className="footer-container glass-panel-3d">
         <div className="footer-grid">
           {/* Brand Info */}
           <div className="footer-brand-col">

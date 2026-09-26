@@ -40,7 +40,7 @@ export default function Register() {
     <div className="auth-page-3d">
       <ThreeCanvas variant="auth" />
 
-      <div className="auth-card-3d 3d-glass-panel">
+      <div className="auth-card-3d glass-panel-3d">
         <div className="auth-header-3d">
           <div className="auth-logo-box">
             <Cpu size={28} className="text-accent" />

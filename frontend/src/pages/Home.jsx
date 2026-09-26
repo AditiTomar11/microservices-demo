@@ -146,7 +146,7 @@ function Home({
           </p>
 
           {/* Hero Search Bar */}
-          <div className="hero-search-box-3d 3d-glass-panel">
+          <div className="hero-search-box-3d glass-panel-3d">
             <Search className="search-icon" size={18} />
             <input
               type="text"
@@ -173,14 +173,14 @@ function Home({
         </div>
 
         <div className="hero-media-3d">
-          <div className="video-card-3d 3d-glass-panel">
+          <div className="video-card-3d glass-panel-3d">
             <video className="hero-video-player" autoPlay muted loop playsInline>
               <source src="/hero.mp4" type="video/mp4" />
             </video>
             <div className="video-overlay-shine" />
           </div>
 
-          <div className="floating-hud-card hud-top-right 3d-glass-panel">
+          <div className="floating-hud-card hud-top-right glass-panel-3d">
             <div className="hud-icon"><Zap size={16} color="#00f2fe" /></div>
             <div>
               <strong>Order Merging</strong>
@@ -188,7 +188,7 @@ function Home({
             </div>
           </div>
 
-          <div className="floating-hud-card hud-bottom-left 3d-glass-panel">
+          <div className="floating-hud-card hud-bottom-left glass-panel-3d">
             <div className="hud-icon"><ShieldCheck size={16} color="#5865f2" /></div>
             <div>
               <strong>JWT Authenticated</strong>
@@ -209,7 +209,7 @@ function Home({
         </div>
 
         {/* Filter Controls Bar */}
-        <div className="controls-bar-3d 3d-glass-panel">
+        <div className="controls-bar-3d glass-panel-3d">
           {/* Category Filter Chips */}
           <div className="category-filter-chips">
             {categories.map((cat) => (
@@ -310,7 +310,7 @@ function Home({
 
         {/* Empty State */}
         {!loading && filteredProducts.length === 0 && !error && (
-          <div className="empty-catalog-box 3d-glass-panel">
+          <div className="empty-catalog-box glass-panel-3d">
             <Layers size={40} className="text-accent" />
             <h3>No Products Found</h3>
             <p>Try resetting filters, searching for a different keyword, or adjusting the price range.</p>
@@ -345,7 +345,7 @@ function Home({
             {categoryShowcase.map((cat) => (
               <div
                 key={cat.name}
-                className="category-showcase-card 3d-glass-panel"
+                className="category-showcase-card glass-panel-3d"
                 onClick={() => {
                   setActiveCategory(cat.name);
                   document
@@ -378,7 +378,7 @@ function Home({
 
         <div className="why-choose-us-grid">
           {WHY_CHOOSE_US.map((item, idx) => (
-            <div key={idx} className="why-card-3d 3d-glass-panel">
+            <div key={idx} className="why-card-3d glass-panel-3d">
               <div className="why-icon-box">{item.icon}</div>
               <h3>{item.title}</h3>
               <p>{item.description}</p>
@@ -398,7 +398,7 @@ function Home({
 
         <div className="how-it-works-grid">
           {HOW_IT_WORKS.map((item) => (
-            <div key={item.step} className="how-card-3d 3d-glass-panel">
+            <div key={item.step} className="how-card-3d glass-panel-3d">
               <div className="step-number-badge">{item.step}</div>
               <h3>{item.title}</h3>
               <p>{item.description}</p>
@@ -409,7 +409,7 @@ function Home({
 
       {/* CTA Banner */}
       <section className="cta-banner-3d">
-        <div className="cta-banner-inner 3d-glass-panel">
+        <div className="cta-banner-inner glass-panel-3d">
           <div className="cta-banner-content">
             <h2>Ready to Upgrade Your Tech Setup?</h2>
             <p>Explore our full collection of verified hardware with instant order merging.</p>
