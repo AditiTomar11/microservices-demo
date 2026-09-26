@@ -1,8 +1,10 @@
 import { Link } from 'react-router-dom';
 import { useEffect, useRef, useState } from 'react';
+import ThreeCanvas from '../components/ThreeCanvas';
+import { Cpu, Server, ShieldCheck, Zap, ArrowRight, Layers, Radio, Network } from 'lucide-react';
 import './AboutPage.css';
 
-// Simple scroll-reveal hook — adds .is-visible when element enters viewport
+// Simple scroll-reveal hook
 function useReveal() {
   const ref = useRef(null);
   const [visible, setVisible] = useState(false);
@@ -66,87 +68,141 @@ function Reveal({ children, className = '', delay = 0 }) {
 
 export default function AboutPage() {
   return (
-    <div className="about-page">
-      <section className="about-hero">
-        <div className="orb orb--1" />
-        <div className="orb orb--2" />
-        <div className="orb orb--3" />
+    <div className="about-page-3d">
+      <ThreeCanvas variant="default" />
 
-        <div className="container about-hero__row">
-          <div className="live-pill">
+      {/* Hero */}
+      <section className="about-hero-3d">
+        <div className="about-hero-content">
+          <div className="hero-badge-pill">
             <span className="live-dot" />
-            Live: new products added every week
+            <span>5 Reactive Microservices Behind API Gateway</span>
           </div>
-          <h1 className="about-hero__title">
-            Tech shopping in India
-            <br />
-            shouldn&apos;t feel like <span className="text-accent-anim">a gamble.</span>
+
+          <h1 className="about-hero-title">
+            Next-Gen E-Commerce <br />
+            Built on <span className="text-gradient-3d">Spring Boot Microservices</span>
           </h1>
-          <p className="about-hero__sub">
-            ShopEase started as a simple idea: real specs, real prices, and real categories
-            in one place — instead of scattered listings and half-written descriptions.
+
+          <p className="about-hero-sub">
+            ShopEase is designed as a distributed, high-throughput e-commerce platform.
+            Every listing features authentic specifications, transparent pricing, and smart order merging.
           </p>
 
-          <div className="about-hero__stats">
-            <div className="stat">
+          <div className="about-stats-grid">
+            <div className="stat-card-3d 3d-glass-panel">
               <Counter end={500} suffix="+" />
-              <span className="stat-label">Products listed</span>
+              <span className="stat-label">Hardware Listings</span>
             </div>
-            <div className="stat">
-              <Counter end={12} suffix="" />
-              <span className="stat-label">Categories</span>
+
+            <div className="stat-card-3d 3d-glass-panel">
+              <Counter end={5} suffix="" />
+              <span className="stat-label">Microservices</span>
             </div>
-            <div className="stat">
+
+            <div className="stat-card-3d 3d-glass-panel">
               <Counter end={100} suffix="%" />
-              <span className="stat-label">Genuine listings</span>
+              <span className="stat-label">Verified Specs</span>
             </div>
           </div>
         </div>
       </section>
 
-      <Reveal className="container about-split">
-        <div className="about-split__image">
+      {/* Microservices Architecture Visualizer */}
+      <Reveal className="arch-visualizer-section">
+        <div className="section-header-3d align-center">
+          <span className="section-cyber-tag">SYSTEM BLUEPRINT</span>
+          <h2 className="section-title-3d">Microservices Topology</h2>
+          <p className="section-subtext">Service discovery, reactive routing, and Feign inter-service calls</p>
+        </div>
+
+        <div className="arch-nodes-grid">
+          <div className="arch-node-card 3d-glass-panel">
+            <div className="node-icon-box"><Radio size={20} className="text-accent" /></div>
+            <div className="node-port">Port 8761</div>
+            <h3>eureka-server</h3>
+            <p>Service Registry & Discovery hub where all microservices register dynamically.</p>
+          </div>
+
+          <div className="arch-node-card 3d-glass-panel highlight">
+            <div className="node-icon-box"><Network size={20} className="text-cyan" /></div>
+            <div className="node-port">Port 8080</div>
+            <h3>api-gateway</h3>
+            <p>Spring Cloud Gateway (WebFlux) entry point routing /products, /orders, /auth.</p>
+          </div>
+
+          <div className="arch-node-card 3d-glass-panel">
+            <div className="node-icon-box"><Cpu size={20} className="text-accent" /></div>
+            <div className="node-port">Port 8081</div>
+            <h3>product-service</h3>
+            <p>Onion Architecture service managing catalog, categories, and full product text.</p>
+          </div>
+
+          <div className="arch-node-card 3d-glass-panel">
+            <div className="node-icon-box"><Zap size={20} className="text-orange" /></div>
+            <div className="node-port">Port 8082</div>
+            <h3>order-service</h3>
+            <p>Onion Architecture order service with OpenFeign client & duplicate PENDING order merging.</p>
+          </div>
+
+          <div className="arch-node-card 3d-glass-panel">
+            <div className="node-icon-box"><ShieldCheck size={20} className="text-purple" /></div>
+            <div className="node-port">Port 8083</div>
+            <h3>auth-service</h3>
+            <p>Stateless JWT authentication service issuing Bearer tokens with BCrypt credentials.</p>
+          </div>
+        </div>
+      </Reveal>
+
+      {/* Split Story */}
+      <Reveal className="about-split-3d">
+        <div className="about-split-img-box 3d-glass-panel">
           <img
             src="https://images.unsplash.com/photo-1518770660439-4636190af475?w=1000"
             alt="Electronics and gadgets"
           />
-          <div className="image-glow" />
+          <div className="img-shine-overlay" />
         </div>
-        <div className="about-split__copy">
-          <h2>What we&apos;re building</h2>
+
+        <div className="about-split-content">
+          <h2>What We&apos;re Building</h2>
           <p>
             Every product on ShopEase carries the details that actually matter before you buy —
-            clear specs, honest pricing, and the right category, not marketing language dressed
-            up as facts. Filter by what you need, compare a few options, and check out without
-            digging through five open tabs.
+            clear hardware specs, honest pricing, and the right category without fluff.
+            Filter by what you need, compare options side by side, and check out instantly.
           </p>
           <p>
-            We&apos;re not a marketplace stuffed with resellers. No paid placements, no
-            &quot;sponsored&quot; listings pushed above what actually matches your search. Just
-            a faster, clearer way to find the tech you&apos;re looking for.
+            We eliminate sponsored listings and paid rankings. What you see matches your exact search,
+            powered by microservice speed and stateless security.
           </p>
         </div>
       </Reveal>
 
-      <section className="about-values">
-        <div className="container about-values__grid">
+      {/* Values */}
+      <section className="about-values-section">
+        <div className="section-header-3d">
+          <span className="section-cyber-tag">CORE PRINCIPLES</span>
+          <h2 className="section-title-3d">Platform Directives</h2>
+        </div>
+
+        <div className="about-values-grid">
           {[
             {
-              title: 'Clarity over clutter',
-              text: 'A well-described product beats ten vague ones. Every listing here has a real category, description, and price — no "contact for price."',
+              title: 'Clarity Over Clutter',
+              text: 'Every product listing has a verified category, detailed text specs, and exact price — no hidden fees.',
             },
             {
-              title: 'No pay-to-rank listings',
-              text: 'What you see first matches your filters, not whoever paid the most for visibility this month.',
+              title: 'No Pay-To-Rank Listings',
+              text: 'Search results strictly match your selected filter criteria, not third-party sponsored positions.',
             },
             {
-              title: 'Built for comparing',
-              text: 'Browse by category, check specs side by side, and decide — without switching between five browser tabs.',
+              title: 'Built for Comparing',
+              text: 'Filter by category and price slider in real-time without refreshing or switching browser tabs.',
             },
           ].map((v, i) => (
             <Reveal key={v.title} delay={i * 120}>
-              <div className="about-value">
-                <div className="about-value__icon">0{i + 1}</div>
+              <div className="value-card-3d 3d-glass-panel">
+                <div className="value-num">0{i + 1}</div>
                 <h3>{v.title}</h3>
                 <p>{v.text}</p>
               </div>
@@ -155,15 +211,21 @@ export default function AboutPage() {
         </div>
       </section>
 
-      <Reveal className="container about-cta">
-        <h2>Looking for your next gadget?</h2>
-        <div className="about-cta__actions">
-          <Link to="/#products" className="btn btn-accent btn-pulse">
-            Browse products
-          </Link>
-          <Link to="/" className="btn btn-outline">
-            Back to home
-          </Link>
+      {/* CTA */}
+      <Reveal className="about-cta-section">
+        <div className="about-cta-inner 3d-glass-panel">
+          <h2>Looking for Your Next High-Tech Gadget?</h2>
+          <p>Browse our catalog and experience microservice e-commerce in action.</p>
+
+          <div className="about-cta-actions">
+            <Link to="/#products" className="btn-cyber-solid lg-btn">
+              <span>Browse Catalog</span>
+              <ArrowRight size={16} />
+            </Link>
+            <Link to="/" className="btn-cyber-outline lg-btn">
+              <span>Return Home</span>
+            </Link>
+          </div>
         </div>
       </Reveal>
     </div>
