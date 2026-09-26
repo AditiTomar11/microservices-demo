@@ -23,7 +23,6 @@ export default function ThreeCanvas({ variant = 'default' }) {
     let particlesMat = null;
 
     try {
-      // Scene, Camera, Renderer
       const scene = new THREE.Scene();
       const camera = new THREE.PerspectiveCamera(
         60,
@@ -38,11 +37,10 @@ export default function ThreeCanvas({ variant = 'default' }) {
       renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
       container.appendChild(renderer.domElement);
 
-      // Group to hold objects
       const group = new THREE.Group();
       scene.add(group);
 
-      // 1. Central 3D Geometry (Futuristic Core)
+      // Geometry selection for Light Theme
       if (variant === 'hero') {
         coreGeometry = new THREE.TorusKnotGeometry(2.5, 0.7, 120, 16);
       } else if (variant === 'auth') {
@@ -52,47 +50,45 @@ export default function ThreeCanvas({ variant = 'default' }) {
       }
 
       wireframeMaterial = new THREE.MeshBasicMaterial({
-        color: 0x5865f2,
+        color: 0x4f46e5, // Light theme indigo accent
         wireframe: true,
         transparent: true,
-        opacity: 0.25,
+        opacity: 0.15,
       });
       const coreMesh = new THREE.Mesh(coreGeometry, wireframeMaterial);
       group.add(coreMesh);
 
-      // Inner glowing solid mesh
       innerGeometry = new THREE.IcosahedronGeometry(1.6, 1);
       innerMaterial = new THREE.MeshBasicMaterial({
-        color: 0x00f2fe,
+        color: 0x0284c7, // Cyan
         wireframe: true,
         transparent: true,
-        opacity: 0.4,
+        opacity: 0.22,
       });
       const innerMesh = new THREE.Mesh(innerGeometry, innerMaterial);
       group.add(innerMesh);
 
-      // 2. Outer Ring
       ringGeo = new THREE.RingGeometry(4.2, 4.3, 64);
       ringMat = new THREE.MeshBasicMaterial({
-        color: 0x7928ca,
+        color: 0x7c3aed, // Violet
         side: THREE.DoubleSide,
         transparent: true,
-        opacity: 0.3,
+        opacity: 0.2,
       });
       const ringMesh = new THREE.Mesh(ringGeo, ringMat);
       ringMesh.rotation.x = Math.PI / 3;
       group.add(ringMesh);
 
-      // 3. Particle Starfield
-      const particlesCount = variant === 'hero' ? 700 : 350;
+      // Particle Field
+      const particlesCount = variant === 'hero' ? 600 : 300;
       const posArray = new Float32Array(particlesCount * 3);
       const colorArray = new Float32Array(particlesCount * 3);
 
       const colors = [
-        new THREE.Color('#5865f2'),
-        new THREE.Color('#00f2fe'),
-        new THREE.Color('#7928ca'),
-        new THREE.Color('#ffffff'),
+        new THREE.Color('#4f46e5'),
+        new THREE.Color('#0284c7'),
+        new THREE.Color('#7c3aed'),
+        new THREE.Color('#94a3b8'),
       ];
 
       for (let i = 0; i < particlesCount * 3; i += 3) {
@@ -114,14 +110,12 @@ export default function ThreeCanvas({ variant = 'default' }) {
         size: 0.08,
         vertexColors: true,
         transparent: true,
-        opacity: 0.7,
-        blending: THREE.AdditiveBlending,
+        opacity: 0.45,
       });
 
       const particlesMesh = new THREE.Points(particlesGeo, particlesMat);
       scene.add(particlesMesh);
 
-      // Mouse Interaction
       let mouseX = 0;
       let mouseY = 0;
       let targetX = 0;
@@ -134,7 +128,6 @@ export default function ThreeCanvas({ variant = 'default' }) {
 
       window.addEventListener('mousemove', handleMouseMove);
 
-      // Resize Handler
       handleResize = () => {
         if (!container || !renderer) return;
         camera.aspect = container.clientWidth / container.clientHeight;
@@ -144,7 +137,6 @@ export default function ThreeCanvas({ variant = 'default' }) {
 
       window.addEventListener('resize', handleResize);
 
-      // Animation Loop
       const clock = new THREE.Clock();
 
       const animate = () => {
@@ -175,7 +167,6 @@ export default function ThreeCanvas({ variant = 'default' }) {
       console.warn('ThreeCanvas WebGL fallback active:', err);
     }
 
-    // Cleanup
     return () => {
       if (handleMouseMove) window.removeEventListener('mousemove', handleMouseMove);
       if (handleResize) window.removeEventListener('resize', handleResize);
