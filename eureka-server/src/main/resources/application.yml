@@ -1,5 +1,6 @@
 server:
-  port: 8761
+  # Render injects PORT (10000 by default); fall back to 8761 locally.
+  port: ${PORT:8761}
 
 eureka:
   client:

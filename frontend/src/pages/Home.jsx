@@ -27,6 +27,14 @@ const WHY_CHOOSE_US = [
   },
 ];
 
+// After this long on the initial load, assume the free-tier backend is cold-starting.
+const WAKE_HINT_DELAY_MS = 6000;
+// A cold start can fail with a 502/503 from the hosting edge before the JVM is up;
+// retry a few times before showing an error.
+const MAX_FETCH_ATTEMPTS = 4;
+const RETRY_DELAY_MS = 8000;
+const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
 const HOW_IT_WORKS = [
   { step: '01', title: 'Browse Tech Gadgets', description: 'Filter by Laptop, Mobile, Tablet, or Smartwatch categories in real-time.' },
   { step: '02', title: 'Gateway Routing', description: 'API Gateway (Port 8080) validates request headers & proxies route.' },
@@ -54,22 +62,42 @@ function Home({
   const [sortBy, setSortBy] = useState('default');
   const [showWishlistOnly, setShowWishlistOnly] = useState(false);
 
+  // Free-tier Render services spin down when idle and take a minute or more to
+  // boot on the next request. Tell the user that's what's happening, and retry a
+  // few times instead of giving up on the first failed attempt.
+  const [wakingUp, setWakingUp] = useState(false);
+
   const fetchProducts = async () => {
     setLoading(true);
-    try {
-      const res = await axiosInstance.get('/products');
-      const data = Array.isArray(res.data) ? res.data : [];
-      setProducts(data);
-      if (onProductsLoaded) onProductsLoaded(data);
+    setError('');
+    const wakeHintTimer = setTimeout(() => setWakingUp(true), WAKE_HINT_DELAY_MS);
 
-      if (data.length > 0) {
-        const highest = Math.max(...data.map((p) => p.price || 0));
-        setMaxPrice(highest > 0 ? highest : 500000);
+    try {
+      for (let attempt = 1; ; attempt++) {
+        try {
+          const res = await axiosInstance.get('/products');
+          const data = Array.isArray(res.data) ? res.data : [];
+          setProducts(data);
+          if (onProductsLoaded) onProductsLoaded(data);
+
+          if (data.length > 0) {
+            const highest = Math.max(...data.map((p) => p.price || 0));
+            setMaxPrice(highest > 0 ? highest : 500000);
+          }
+          return;
+        } catch (err) {
+          if (attempt >= MAX_FETCH_ATTEMPTS) {
+            setError(
+              'The backend is taking longer than usual to wake up. Give it a moment and hit Retry.'
+            );
+            return;
+          }
+          await sleep(RETRY_DELAY_MS);
+        }
       }
-      setError('');
-    } catch (err) {
-      setError('Backend microservices currently unreachable. Verify API Gateway and Eureka status.');
     } finally {
+      clearTimeout(wakeHintTimer);
+      setWakingUp(false);
       setLoading(false);
     }
   };
@@ -281,13 +309,21 @@ function Home({
         {error && (
           <div className="auth-alert-banner error">
             <p>{error}</p>
+            <button type="button" className="btn-cyber-outline btn-retry" onClick={fetchProducts}>
+              Retry
+            </button>
           </div>
         )}
 
         {loading && (
           <div className="drawer-empty-state">
             <div className="cyber-spinner" />
-            <p>Retrieving Gadget Catalog...</p>
+            <p>{wakingUp ? 'Waking up the backend services...' : 'Retrieving Gadget Catalog...'}</p>
+            {wakingUp && (
+              <p className="wake-hint">
+                The servers sleep when idle on free hosting, so the first load can take a minute or two.
+              </p>
+            )}
           </div>
         )}
 

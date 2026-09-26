@@ -1185,6 +1185,34 @@ body {
   padding: 60px 20px;
 }
 
+/* Loading indicator used while the catalog is fetched (and while a cold backend boots) */
+.cyber-spinner {
+  width: 42px;
+  height: 42px;
+  margin: 0 auto 16px;
+  border-radius: 50%;
+  border: 3px solid rgba(79, 70, 229, 0.15);
+  border-top-color: var(--accent-primary);
+  animation: cyber-spin 0.9s linear infinite;
+}
+
+@keyframes cyber-spin {
+  to { transform: rotate(360deg); }
+}
+
+.wake-hint {
+  margin-top: 8px;
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+.btn-retry {
+  margin-left: auto;
+  padding: 6px 14px;
+  font-size: 12px;
+  white-space: nowrap;
+}
+
 .empty-icon-ring {
   width: 70px;
   height: 70px;
