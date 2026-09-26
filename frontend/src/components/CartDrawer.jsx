@@ -1,6 +1,9 @@
 import { useState } from 'react';
-import { X, Trash2, ShoppingBag, ArrowRight, ShieldCheck, Zap } from 'lucide-react';
+import { X, Trash2, ShoppingCart } from 'lucide-react';
 import axiosInstance from '../api/axiosInstance';
+import useLockBodyScroll from '../hooks/useLockBodyScroll';
+
+const PLACEHOLDER_IMAGE = 'https://images.unsplash.com/photo-1526738549149-8e07eca6c147?w=300';
 
 export default function CartDrawer({
   isOpen,
@@ -14,6 +17,8 @@ export default function CartDrawer({
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState({ type: '', text: '' });
 
+  useLockBodyScroll(isOpen);
+
   const isLoggedIn = !!localStorage.getItem('token');
   const username = localStorage.getItem('username');
 
@@ -24,7 +29,7 @@ export default function CartDrawer({
 
   const handleCheckout = async () => {
     if (!isLoggedIn) {
-      setMessage({ type: 'error', text: 'Please log in to place your order.' });
+      setMessage({ type: 'error', text: 'Please sign in to place your order.' });
       return;
     }
 
@@ -43,7 +48,7 @@ export default function CartDrawer({
         });
       }
 
-      setMessage({ type: 'success', text: '🎉 Orders successfully placed!' });
+      setMessage({ type: 'success', text: 'Thank you — your order has been placed.' });
       onClearCart();
       if (onOrderPlaced) onOrderPlaced();
 
@@ -54,7 +59,7 @@ export default function CartDrawer({
     } catch (err) {
       setMessage({
         type: 'error',
-        text: 'Failed to place order. Backend service might be unavailable.',
+        text: 'We could not place the order. The order service may be unavailable.',
       });
     } finally {
       setLoading(false);
@@ -64,124 +69,101 @@ export default function CartDrawer({
   if (!isOpen) return null;
 
   return (
-    <div className="drawer-overlay" onClick={onClose}>
-      <div className="drawer-content glass-panel-3d" onClick={(e) => e.stopPropagation()}>
-        {/* Header */}
-        <div className="drawer-header">
-          <div className="drawer-title">
-            <ShoppingBag size={20} className="text-accent" />
-            <h2>Your Shopping Cart</h2>
-            <span className="drawer-count-tag">{cartItems.length} items</span>
-          </div>
-          <button className="icon-close-btn" onClick={onClose}>
-            <X size={18} />
+    <div className="drawer-backdrop" onClick={onClose}>
+      <aside className="drawer" aria-label="Shopping cart" onClick={(e) => e.stopPropagation()}>
+        <header className="drawer-head">
+          <h2>
+            Your Cart <span>({cartItems.length})</span>
+          </h2>
+          <button type="button" className="icon-btn" onClick={onClose} aria-label="Close cart">
+            <X size={20} strokeWidth={1.5} />
           </button>
-        </div>
+        </header>
 
-        {/* Message Banner */}
-        {message.text && (
-          <div className={`drawer-alert ${message.type}`}>
-            {message.text}
-          </div>
-        )}
+        {message.text && <div className={`notice notice-${message.type}`}>{message.text}</div>}
 
-        {/* Body Items */}
         <div className="drawer-body">
           {cartItems.length === 0 ? (
-            <div className="drawer-empty-state">
-              <div className="empty-icon-ring">
-                <ShoppingBag size={36} color="#5865f2" />
-              </div>
-              <h3>Your Cart is Empty</h3>
-              <p>Explore our high-tech catalog and add your favorite gadgets!</p>
+            <div className="drawer-empty">
+              <ShoppingCart size={32} strokeWidth={1.25} />
+              <h3>Your cart is empty</h3>
+              <p>Browse the collection and add the pieces you like.</p>
+              <button type="button" className="btn btn-outline btn-sm" onClick={onClose}>
+                Continue shopping
+              </button>
             </div>
           ) : (
-            <div className="cart-items-list">
+            <ul className="line-items">
               {cartItems.map((item) => (
-                <div key={item.product.id} className="cart-item-card">
+                <li key={item.product.id} className="line-item">
                   <img
-                    src={
-                      item.product.imageUrl ||
-                      'https://images.unsplash.com/photo-1526738549149-8e07eca6c147?w=300'
-                    }
+                    src={item.product.imageUrl || PLACEHOLDER_IMAGE}
                     alt={item.product.name}
-                    className="cart-item-img"
+                    className="line-thumb"
                   />
-                  <div className="cart-item-info">
+                  <div className="line-info">
                     <h4>{item.product.name}</h4>
-                    <span className="cart-item-price">
-                      ₹{Number(item.product.price).toLocaleString('en-IN')}
-                    </span>
-                    <div className="cart-quantity-controls">
+                    <p className="line-price">₹{Number(item.product.price).toLocaleString('en-IN')}</p>
+                    <div className="qty-stepper qty-sm" aria-label="Quantity">
                       <button
-                        className="qty-btn"
-                        onClick={() =>
-                          onUpdateQuantity(item.product.id, item.quantity - 1)
-                        }
+                        type="button"
+                        aria-label="Decrease"
+                        onClick={() => onUpdateQuantity(item.product.id, item.quantity - 1)}
                       >
-                        -
+                        −
                       </button>
-                      <span className="qty-value">{item.quantity}</span>
+                      <span>{item.quantity}</span>
                       <button
-                        className="qty-btn"
-                        onClick={() =>
-                          onUpdateQuantity(item.product.id, item.quantity + 1)
-                        }
+                        type="button"
+                        aria-label="Increase"
+                        onClick={() => onUpdateQuantity(item.product.id, item.quantity + 1)}
                       >
                         +
                       </button>
                     </div>
                   </div>
                   <button
-                    className="cart-remove-btn"
-                    title="Remove item"
+                    type="button"
+                    className="icon-btn line-remove"
+                    title="Remove"
+                    aria-label={`Remove ${item.product.name}`}
                     onClick={() => onRemoveItem(item.product.id)}
                   >
-                    <Trash2 size={16} />
+                    <Trash2 size={16} strokeWidth={1.5} />
                   </button>
-                </div>
+                </li>
               ))}
-            </div>
+            </ul>
           )}
         </div>
 
-        {/* Footer */}
         {cartItems.length > 0 && (
-          <div className="drawer-footer">
-            <div className="cart-summary-row">
+          <footer className="drawer-foot">
+            <div className="summary-row">
               <span>Subtotal</span>
-              <span className="summary-total-price">
-                ₹{totalPrice.toLocaleString('en-IN')}
-              </span>
+              <span>₹{totalPrice.toLocaleString('en-IN')}</span>
             </div>
-            <div className="cart-summary-row muted">
+            <div className="summary-row summary-muted">
               <span>Shipping</span>
-              <span className="text-success">FREE & FAST</span>
+              <span>Free</span>
             </div>
-
-            <div className="secure-checkout-tag">
-              <ShieldCheck size={14} />
-              <span>Gateway Encrypted & Microservice Synchronized</span>
+            <div className="summary-row summary-total">
+              <span>Total</span>
+              <span>₹{totalPrice.toLocaleString('en-IN')}</span>
             </div>
 
             <button
-              className="btn-cyber-solid checkout-btn full-width"
+              type="button"
+              className="btn btn-dark btn-block btn-lg"
               onClick={handleCheckout}
               disabled={loading}
             >
-              {loading ? (
-                <span className="spinner-text">Processing Orders...</span>
-              ) : (
-                <>
-                  <Zap size={16} />
-                  <span>Checkout Now (₹{totalPrice.toLocaleString('en-IN')})</span>
-                  <ArrowRight size={16} />
-                </>
-              )}
+              {loading ? 'Placing your order…' : 'Checkout'}
             </button>
-          </div>
+            <p className="drawer-note">Taxes included. Orders are confirmed by our order service.</p>
+          </footer>
         )}
-      </div>
+      </aside>
     </div>
   );
 }

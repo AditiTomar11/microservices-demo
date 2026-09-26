@@ -6,6 +6,15 @@ export default defineConfig({
   server: {
     port: 5173,
     host: '0.0.0.0',
-    allowedHosts: true
-  }
+    allowedHosts: true,
+    // Optional: set VITE_API_URL=/api in .env.local to talk to a locally running
+    // API gateway (port 8080) without CORS during development.
+    proxy: {
+      '/api': {
+        target: 'http://localhost:8080',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/api/, ''),
+      },
+    },
+  },
 })

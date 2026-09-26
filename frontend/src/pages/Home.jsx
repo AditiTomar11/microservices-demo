@@ -1,41 +1,73 @@
 import { useEffect, useState, useMemo } from 'react';
+import { useLocation } from 'react-router-dom';
 import axiosInstance from '../api/axiosInstance';
-import Product3DCard from '../components/Product3DCard';
-import ThreeCanvas from '../components/ThreeCanvas';
-import { Search, SlidersHorizontal, ArrowDownUp, Heart, Cpu, ShieldCheck, Zap, Truck, Layers, ArrowRight, Laptop, Smartphone, Tablet, Watch, Headphones } from 'lucide-react';
+import ProductCard from '../components/ProductCard';
+import {
+  Search,
+  Heart,
+  ChevronDown,
+  ArrowRight,
+  BadgeCheck,
+  Tag,
+  ShieldCheck,
+  Truck,
+  Cpu,
+  Laptop,
+  Smartphone,
+  Tablet,
+  Watch,
+  Headphones,
+} from 'lucide-react';
 
 const WHY_CHOOSE_US = [
   {
-    icon: <Cpu className="text-accent" size={24} />,
-    title: 'Verified Hardware Specs',
-    description: 'Every gadget (Laptop, Mobile, Tablet, Watch) is listed with authentic manufacturer benchmarks.',
+    Icon: BadgeCheck,
+    title: 'Verified Specifications',
+    description: 'Every laptop, phone, tablet and watch is listed with authentic manufacturer specs — no guesswork.',
   },
   {
-    icon: <Zap className="text-accent" size={24} />,
-    title: 'Smart Order Merging',
-    description: 'Our backend order-service automatically consolidates repeat PENDING orders.',
+    Icon: Tag,
+    title: 'Honest Pricing',
+    description: 'Exact prices with taxes included. No sponsored rankings and no hidden fees at checkout.',
   },
   {
-    icon: <ShieldCheck className="text-accent" size={24} />,
-    title: 'JWT Stateless Protection',
-    description: 'Stateless Bearer tokens passed seamlessly across Spring Gateway and Feign clients.',
+    Icon: ShieldCheck,
+    title: 'Secure Checkout',
+    description: 'Stateless JWT authentication protects your account across every service behind the gateway.',
   },
   {
-    icon: <Truck className="text-accent" size={24} />,
-    title: 'Express Tech Dispatch',
-    description: 'Orders routed through reactive API Gateway directly to fulfillment.',
+    Icon: Truck,
+    title: 'Fast Dispatch',
+    description: 'Orders flow straight to fulfilment, and repeat orders are consolidated automatically.',
   },
 ];
 
 const HOW_IT_WORKS = [
-  { step: '01', title: 'Browse Tech Gadgets', description: 'Filter by Laptop, Mobile, Tablet, or Smartwatch categories in real-time.' },
-  { step: '02', title: 'Gateway Routing', description: 'API Gateway (Port 8080) validates request headers & proxies route.' },
-  { step: '03', title: 'Feign Product Lookup', description: 'Order-service retrieves live product details via OpenFeign client.' },
-  { step: '04', title: 'Instant Order Merge', description: 'Existing PENDING orders are incremented automatically without row duplication.' },
+  { step: '01', title: 'Browse', description: 'Filter the collection by category and price in real time.' },
+  { step: '02', title: 'Compare', description: 'Open a quick view to check specifications side by side.' },
+  { step: '03', title: 'Order', description: 'Add to cart or buy now — sign in once and you are set.' },
+  { step: '04', title: 'Dispatch', description: 'Your order is confirmed and prepared for delivery.' },
 ];
 
+// After this long on the initial load, assume the free-tier backend is cold-starting.
+const WAKE_HINT_DELAY_MS = 6000;
+// A cold start can fail with a 502/503 from the hosting edge before the JVM is up;
+// retry a few times before showing an error.
+const MAX_FETCH_ATTEMPTS = 4;
+const RETRY_DELAY_MS = 8000;
+const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
+function categoryIcon(name) {
+  const lower = name.toLowerCase();
+  if (lower.includes('laptop') || lower.includes('computer')) return Laptop;
+  if (lower.includes('mobile') || lower.includes('phone')) return Smartphone;
+  if (lower.includes('tablet') || lower.includes('pad')) return Tablet;
+  if (lower.includes('watch') || lower.includes('wearable')) return Watch;
+  if (lower.includes('audio') || lower.includes('headphone')) return Headphones;
+  return Cpu;
+}
+
 function Home({
-  cartItems,
   wishlistIds,
   onAddToCart,
   onBuyNow,
@@ -43,6 +75,7 @@ function Home({
   onQuickView,
   onProductsLoaded,
 }) {
+  const location = useLocation();
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -54,22 +87,42 @@ function Home({
   const [sortBy, setSortBy] = useState('default');
   const [showWishlistOnly, setShowWishlistOnly] = useState(false);
 
+  // Free-tier Render services spin down when idle and take a minute or more to
+  // boot on the next request. Tell the user that's what's happening, and retry a
+  // few times instead of giving up on the first failed attempt.
+  const [wakingUp, setWakingUp] = useState(false);
+
   const fetchProducts = async () => {
     setLoading(true);
-    try {
-      const res = await axiosInstance.get('/products');
-      const data = Array.isArray(res.data) ? res.data : [];
-      setProducts(data);
-      if (onProductsLoaded) onProductsLoaded(data);
+    setError('');
+    const wakeHintTimer = setTimeout(() => setWakingUp(true), WAKE_HINT_DELAY_MS);
 
-      if (data.length > 0) {
-        const highest = Math.max(...data.map((p) => p.price || 0));
-        setMaxPrice(highest > 0 ? highest : 500000);
+    try {
+      for (let attempt = 1; ; attempt++) {
+        try {
+          const res = await axiosInstance.get('/products');
+          const data = Array.isArray(res.data) ? res.data : [];
+          setProducts(data);
+          if (onProductsLoaded) onProductsLoaded(data);
+
+          if (data.length > 0) {
+            const highest = Math.max(...data.map((p) => p.price || 0));
+            setMaxPrice(highest > 0 ? highest : 500000);
+          }
+          return;
+        } catch (err) {
+          if (attempt >= MAX_FETCH_ATTEMPTS) {
+            setError(
+              'The backend is taking longer than usual to wake up. Give it a moment and hit Retry.'
+            );
+            return;
+          }
+          await sleep(RETRY_DELAY_MS);
+        }
       }
-      setError('');
-    } catch (err) {
-      setError('Backend microservices currently unreachable. Verify API Gateway and Eureka status.');
     } finally {
+      clearTimeout(wakeHintTimer);
+      setWakingUp(false);
       setLoading(false);
     }
   };
@@ -77,6 +130,24 @@ function Home({
   useEffect(() => {
     fetchProducts();
   }, []);
+
+  // Honour "/#products" / "/#categories" links coming from other pages once the
+  // catalog has rendered.
+  useEffect(() => {
+    if (loading || !location.hash) return;
+    const target = document.getElementById(location.hash.slice(1));
+    if (target) target.scrollIntoView({ behavior: 'smooth' });
+  }, [loading, location.hash]);
+
+  const scrollToProducts = (e) => {
+    e.preventDefault();
+    document.getElementById('products')?.scrollIntoView({ behavior: 'smooth' });
+  };
+
+  const highestPrice = useMemo(
+    () => (products.length > 0 ? Math.max(...products.map((p) => p.price || 0)) : 500000),
+    [products]
+  );
 
   const categories = useMemo(() => {
     const set = new Set(products.map((p) => p.category).filter(Boolean));
@@ -111,314 +182,253 @@ function Home({
   const categoryShowcase = useMemo(() => {
     return categories
       .filter((c) => c !== 'All')
-      .map((cat) => {
-        let IconComponent = Cpu;
-        const catLower = cat.toLowerCase();
-        if (catLower.includes('laptop') || catLower.includes('computer')) IconComponent = Laptop;
-        else if (catLower.includes('mobile') || catLower.includes('phone')) IconComponent = Smartphone;
-        else if (catLower.includes('tablet') || catLower.includes('pad')) IconComponent = Tablet;
-        else if (catLower.includes('watch') || catLower.includes('wearable')) IconComponent = Watch;
-        else if (catLower.includes('audio') || catLower.includes('headphone')) IconComponent = Headphones;
-
-        return {
-          name: cat,
-          count: products.filter((p) => p.category === cat).length,
-          Icon: IconComponent,
-        };
-      });
+      .map((cat) => ({
+        name: cat,
+        count: products.filter((p) => p.category === cat).length,
+        Icon: categoryIcon(cat),
+      }));
   }, [categories, products]);
 
+  const resetFilters = () => {
+    setSearchQuery('');
+    setActiveCategory('All');
+    setShowWishlistOnly(false);
+    setSortBy('default');
+    setMaxPrice(highestPrice);
+  };
+
   return (
-    <div className="home-page-container">
-      {/* Hero Section */}
-      <section className="hero-section-3d">
-        <ThreeCanvas variant="hero" />
-
-        <div className="hero-content-3d">
-          <div className="hero-badge-pill">
-            <span className="live-dot" />
-            <span>AUTHENTIC TECH & GADGETS SHOWCASE</span>
-          </div>
-
-          <h1 className="hero-title-3d">
-            Next-Gen Hardware. <br />
-            <span className="text-gradient-3d">Verified Specs & Value.</span>
+    <div className="home">
+      {/* Hero */}
+      <section className="hero">
+        <div className="hero-inner">
+          <h1 className="hero-title">
+            Next-Gen Hardware.
+            <br />
+            Verified Specs &amp; Value.
           </h1>
+          <a href="#products" className="btn btn-primary btn-lg" onClick={scrollToProducts}>
+            Shop Now
+          </a>
+        </div>
+      </section>
 
-          <p className="hero-subtext-3d">
-            Discover laptops, smartphones, tablets, and smartwatches backed by
-            reactive Spring Boot microservice architecture.
-          </p>
+      {/* Catalog */}
+      <section id="products" className="section">
+        <div className="container">
+          <header className="section-head">
+            <span className="eyebrow">The Collection</span>
+            <h2 className="section-title">Gadgets &amp; Tech</h2>
+            <p className="section-sub">
+              Laptops, smartphones, tablets and wearables — curated and verified.
+            </p>
+          </header>
 
-          {/* Search Box */}
-          <div className="hero-search-box-3d glass-panel-3d">
-            <Search className="search-icon" size={18} />
-            <input
-              type="text"
-              placeholder="Search Laptops, Smartphones, Tablets, Watches..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-            />
-            {searchQuery && (
-              <button className="clear-search-btn" onClick={() => setSearchQuery('')}>
-                Clear
-              </button>
+          <div className="toolbar">
+            <div className="toolbar-row">
+              <label className="search-field">
+                <Search size={18} strokeWidth={1.5} />
+                <input
+                  type="search"
+                  placeholder="Search laptops, phones, tablets, watches…"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                />
+              </label>
+
+              <div className="toolbar-controls">
+                <label className="range-field">
+                  <span>Up to ₹{maxPrice.toLocaleString('en-IN')}</span>
+                  <input
+                    type="range"
+                    min="0"
+                    max={highestPrice}
+                    step="500"
+                    value={Math.min(maxPrice, highestPrice)}
+                    onChange={(e) => setMaxPrice(Number(e.target.value))}
+                  />
+                </label>
+
+                <label className="select-field">
+                  <select value={sortBy} onChange={(e) => setSortBy(e.target.value)}>
+                    <option value="default">Recommended</option>
+                    <option value="price-low">Price: Low to High</option>
+                    <option value="price-high">Price: High to Low</option>
+                    <option value="name-az">Name: A to Z</option>
+                  </select>
+                  <ChevronDown size={16} strokeWidth={1.5} />
+                </label>
+
+                <button
+                  type="button"
+                  className={`toggle-chip${showWishlistOnly ? ' is-active' : ''}`}
+                  onClick={() => setShowWishlistOnly(!showWishlistOnly)}
+                >
+                  <Heart size={14} strokeWidth={1.5} fill={showWishlistOnly ? 'currentColor' : 'none'} />
+                  <span>Wishlist ({wishlistIds.length})</span>
+                </button>
+              </div>
+            </div>
+
+            {categories.length > 1 && (
+              <div className="category-tabs" role="tablist" aria-label="Categories">
+                {categories.map((cat) => (
+                  <button
+                    key={cat}
+                    type="button"
+                    role="tab"
+                    aria-selected={activeCategory === cat}
+                    className={`category-tab${activeCategory === cat ? ' is-active' : ''}`}
+                    onClick={() => setActiveCategory(cat)}
+                  >
+                    {cat}
+                    <span>
+                      {cat === 'All' ? products.length : products.filter((p) => p.category === cat).length}
+                    </span>
+                  </button>
+                ))}
+              </div>
             )}
           </div>
 
-          <div className="hero-actions-3d">
-            <a href="#products" className="btn-cyber-solid lg-btn">
-              <span>Explore Tech Catalog</span>
-              <ArrowRight size={16} />
-            </a>
-            <a href="/about" className="btn-cyber-outline lg-btn">
-              <span>Architecture Specs</span>
-            </a>
-          </div>
-        </div>
-
-        <div className="hero-media-3d">
-          <div className="video-card-3d glass-panel-3d">
-            <video className="hero-video-player" autoPlay muted loop playsInline>
-              <source src="/hero.mp4" type="video/mp4" />
-            </video>
-          </div>
-
-          <div className="floating-hud-card hud-top-right glass-panel-3d">
-            <div className="hud-icon"><Zap size={16} color="#4f46e5" /></div>
-            <div>
-              <strong>Order Consolidation</strong>
-              <small>Duplicate PENDING orders merged</small>
-            </div>
-          </div>
-
-          <div className="floating-hud-card hud-bottom-left glass-panel-3d">
-            <div className="hud-icon"><ShieldCheck size={16} color="#10b981" /></div>
-            <div>
-              <strong>JWT Auth Secured</strong>
-              <small>Spring Cloud Gateway Interceptor</small>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Main Product Catalog */}
-      <section id="products" className="catalog-section-3d">
-        <div className="section-header-3d">
-          <div>
-            <span className="section-cyber-tag">HARDWARE SHOWCASE</span>
-            <h2 className="section-title-3d">Gadgets & Tech Products</h2>
-          </div>
-          <p className="section-subtext">Live catalog fetched from product-service via Gateway</p>
-        </div>
-
-        {/* Filter Bar */}
-        <div className="controls-bar-3d glass-panel-3d">
-          <div className="category-filter-chips">
-            {categories.map((cat) => (
-              <button
-                key={cat}
-                className={`category-chip-3d ${activeCategory === cat ? 'active' : ''}`}
-                onClick={() => setActiveCategory(cat)}
-              >
-                {cat}
-                {cat !== 'All' && (
-                  <span className="chip-count">
-                    ({products.filter((p) => p.category === cat).length})
-                  </span>
-                )}
+          {error && (
+            <div className="notice notice-error">
+              <p>{error}</p>
+              <button type="button" className="btn btn-outline btn-sm" onClick={fetchProducts}>
+                Retry
               </button>
-            ))}
-          </div>
-
-          <div className="controls-inputs-row">
-            {/* Price Slider */}
-            <div className="price-slider-group">
-              <label>
-                <SlidersHorizontal size={14} />
-                <span>Max Price: ₹{maxPrice.toLocaleString('en-IN')}</span>
-              </label>
-              <input
-                type="range"
-                min="0"
-                max={
-                  products.length > 0
-                    ? Math.max(...products.map((p) => p.price || 0))
-                    : 500000
-                }
-                step="500"
-                value={maxPrice}
-                onChange={(e) => setMaxPrice(Number(e.target.value))}
-              />
             </div>
+          )}
 
-            {/* Sort */}
-            <div className="sort-dropdown-group">
-              <ArrowDownUp size={14} className="dropdown-icon" />
-              <select
-                value={sortBy}
-                onChange={(e) => setSortBy(e.target.value)}
-                className="cyber-select"
-              >
-                <option value="default">Sort: Recommended</option>
-                <option value="price-low">Price: Low to High</option>
-                <option value="price-high">Price: High to Low</option>
-                <option value="name-az">Name: A to Z</option>
-              </select>
+          {loading && (
+            <div className="state-block">
+              <div className="spinner" />
+              <p>{wakingUp ? 'Waking up the backend services…' : 'Loading the collection…'}</p>
+              {wakingUp && (
+                <p className="state-hint">
+                  The servers sleep when idle on free hosting, so the first load can take a minute or two.
+                </p>
+              )}
             </div>
+          )}
 
-            {/* Wishlist Toggle */}
-            <button
-              className={`wishlist-filter-btn ${showWishlistOnly ? 'active' : ''}`}
-              onClick={() => setShowWishlistOnly(!showWishlistOnly)}
-            >
-              <Heart size={14} fill={showWishlistOnly ? '#ef4444' : 'none'} color={showWishlistOnly ? '#ef4444' : '#64748b'} />
-              <span>Wishlist Only ({wishlistIds.length})</span>
-            </button>
-          </div>
+          {!loading && filteredProducts.length > 0 && (
+            <>
+              <p className="results-count">
+                Showing {filteredProducts.length} of {products.length} products
+              </p>
+              <div className="product-grid">
+                {filteredProducts.map((product) => (
+                  <ProductCard
+                    key={product.id}
+                    product={product}
+                    onAddToCart={onAddToCart}
+                    onBuyNow={onBuyNow}
+                    onToggleWishlist={onToggleWishlist}
+                    isWishlisted={wishlistIds.includes(product.id)}
+                    onQuickView={onQuickView}
+                  />
+                ))}
+              </div>
+            </>
+          )}
+
+          {!loading && filteredProducts.length === 0 && !error && (
+            <div className="state-block">
+              <h3>No products match your filters</h3>
+              <p>Try a different category, clear the search or raise the price limit.</p>
+              <button type="button" className="btn btn-outline btn-sm" onClick={resetFilters}>
+                Reset filters
+              </button>
+            </div>
+          )}
         </div>
-
-        {error && (
-          <div className="auth-alert-banner error">
-            <p>{error}</p>
-          </div>
-        )}
-
-        {loading && (
-          <div className="drawer-empty-state">
-            <div className="cyber-spinner" />
-            <p>Retrieving Gadget Catalog...</p>
-          </div>
-        )}
-
-        {/* Product Grid */}
-        {!loading && filteredProducts.length > 0 && (
-          <div className="product-grid-3d">
-            {filteredProducts.map((product) => (
-              <Product3DCard
-                key={product.id}
-                product={product}
-                onAddToCart={onAddToCart}
-                onBuyNow={onBuyNow}
-                onToggleWishlist={onToggleWishlist}
-                isWishlisted={wishlistIds.includes(product.id)}
-                onQuickView={onQuickView}
-              />
-            ))}
-          </div>
-        )}
-
-        {!loading && filteredProducts.length === 0 && !error && (
-          <div className="drawer-empty-state glass-panel-3d">
-            <Layers size={40} className="text-accent" />
-            <h3>No Gadgets Match Your Filter</h3>
-            <p>Try resetting filters or adjusting the price slider.</p>
-            <button
-              className="btn-cyber-outline"
-              onClick={() => {
-                setSearchQuery('');
-                setActiveCategory('All');
-                setShowWishlistOnly(false);
-                if (products.length > 0) {
-                  setMaxPrice(Math.max(...products.map((p) => p.price || 0)));
-                }
-              }}
-            >
-              Reset Filters
-            </button>
-          </div>
-        )}
       </section>
 
-      {/* Gadget Categories Showcase */}
+      {/* Categories */}
       {categoryShowcase.length > 0 && (
-        <section className="category-showcase-section">
-          <div className="section-header-3d">
-            <div>
-              <span className="section-cyber-tag">CATEGORIES</span>
-              <h2 className="section-title-3d">Shop By Hardware Category</h2>
-            </div>
-          </div>
+        <section id="categories" className="section section-alt">
+          <div className="container">
+            <header className="section-head">
+              <span className="eyebrow">Browse</span>
+              <h2 className="section-title">Shop by Category</h2>
+            </header>
 
-          <div className="category-showcase-grid">
-            {categoryShowcase.map(({ name, count, Icon }) => (
-              <div
-                key={name}
-                className="category-showcase-card glass-panel-3d"
-                onClick={() => {
-                  setActiveCategory(name);
-                  document
-                    .getElementById('products')
-                    ?.scrollIntoView({ behavior: 'smooth' });
-                }}
-              >
-                <div className="why-icon-box">
-                  <Icon size={22} className="text-accent" />
-                </div>
-                <div className="category-card-header">
+            <div className="category-grid">
+              {categoryShowcase.map(({ name, count, Icon }) => (
+                <button
+                  key={name}
+                  type="button"
+                  className="category-tile"
+                  onClick={() => {
+                    setActiveCategory(name);
+                    document.getElementById('products')?.scrollIntoView({ behavior: 'smooth' });
+                  }}
+                >
+                  <Icon size={30} strokeWidth={1.1} />
                   <h3>{name}</h3>
-                  <span className="category-count-badge">{count} Items</span>
-                </div>
-                <p>High performance {name.toLowerCase()} technology.</p>
-                <span className="category-arrow-link">
-                  Browse {name} <ArrowRight size={14} />
-                </span>
-              </div>
-            ))}
+                  <p>
+                    {count} {count === 1 ? 'product' : 'products'}
+                  </p>
+                  <span className="tile-link">
+                    Browse <ArrowRight size={14} strokeWidth={1.5} />
+                  </span>
+                </button>
+              ))}
+            </div>
           </div>
         </section>
       )}
 
-      {/* Why Choose Us */}
-      <section className="why-choose-us-section">
-        <div className="section-header-3d">
-          <div>
-            <span className="section-cyber-tag">SHOWCASE STANDARDS</span>
-            <h2 className="section-title-3d">Why ShopEase Tech</h2>
-          </div>
-        </div>
+      {/* Why us */}
+      <section className="section">
+        <div className="container">
+          <header className="section-head">
+            <span className="eyebrow">Our Promise</span>
+            <h2 className="section-title">Why ShopEase</h2>
+          </header>
 
-        <div className="why-choose-us-grid">
-          {WHY_CHOOSE_US.map((item, idx) => (
-            <div key={idx} className="why-card-3d glass-panel-3d">
-              <div className="why-icon-box">{item.icon}</div>
-              <h3>{item.title}</h3>
-              <p>{item.description}</p>
-            </div>
-          ))}
+          <div className="feature-grid">
+            {WHY_CHOOSE_US.map(({ Icon, title, description }) => (
+              <div key={title} className="feature">
+                <Icon size={28} strokeWidth={1.1} />
+                <h3>{title}</h3>
+                <p>{description}</p>
+              </div>
+            ))}
+          </div>
         </div>
       </section>
 
-      {/* How It Works */}
-      <section className="how-it-works-section">
-        <div className="section-header-3d">
-          <div>
-            <span className="section-cyber-tag">BACKEND PIPELINE</span>
-            <h2 className="section-title-3d">How Microservices Process Your Order</h2>
-          </div>
-        </div>
+      {/* How it works */}
+      <section className="section section-alt">
+        <div className="container">
+          <header className="section-head">
+            <span className="eyebrow">Simple by Design</span>
+            <h2 className="section-title">How It Works</h2>
+          </header>
 
-        <div className="how-it-works-grid">
-          {HOW_IT_WORKS.map((item) => (
-            <div key={item.step} className="how-card-3d glass-panel-3d">
-              <div className="step-number-badge">{item.step}</div>
-              <h3>{item.title}</h3>
-              <p>{item.description}</p>
-            </div>
-          ))}
+          <ol className="steps">
+            {HOW_IT_WORKS.map((item) => (
+              <li key={item.step} className="step">
+                <span className="step-number">{item.step}</span>
+                <h3>{item.title}</h3>
+                <p>{item.description}</p>
+              </li>
+            ))}
+          </ol>
         </div>
       </section>
 
-      {/* CTA Banner */}
-      <section className="cta-banner-3d">
-        <div className="cta-banner-inner glass-panel-3d">
-          <div className="cta-banner-content">
-            <h2>Ready to Upgrade Your Workspace Setup?</h2>
-            <p>Browse authentic Laptops, Smartphones, Tablets & Smartwatches with instant order dispatch.</p>
+      {/* CTA */}
+      <section className="cta-band">
+        <div className="container cta-inner">
+          <div>
+            <h2>Ready to upgrade your setup?</h2>
+            <p>Authentic laptops, smartphones, tablets and smartwatches — dispatched fast.</p>
           </div>
-          <a href="#products" className="btn-cyber-solid lg-btn">
-            <span>Explore Catalog</span>
-            <ArrowRight size={16} />
+          <a href="#products" className="btn btn-dark btn-lg" onClick={scrollToProducts}>
+            Explore the Collection
           </a>
         </div>
       </section>

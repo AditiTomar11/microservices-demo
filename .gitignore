@@ -16,3 +16,5 @@ application-local.yml
 .idea/
 *.iml
 .vscode/
+# Local env overrides (never commit)
+*.local

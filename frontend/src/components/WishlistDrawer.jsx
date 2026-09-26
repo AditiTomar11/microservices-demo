@@ -1,4 +1,7 @@
-import { Heart, X, ShoppingCart, Trash2, Zap } from 'lucide-react';
+import { Heart, X, Trash2 } from 'lucide-react';
+import useLockBodyScroll from '../hooks/useLockBodyScroll';
+
+const PLACEHOLDER_IMAGE = 'https://images.unsplash.com/photo-1526738549149-8e07eca6c147?w=300';
 
 export default function WishlistDrawer({
   isOpen,
@@ -8,85 +11,75 @@ export default function WishlistDrawer({
   onAddToCart,
   onBuyNow,
 }) {
+  useLockBodyScroll(isOpen);
+
   if (!isOpen) return null;
 
   return (
-    <div className="drawer-overlay" onClick={onClose}>
-      <div className="drawer-content glass-panel-3d" onClick={(e) => e.stopPropagation()}>
-        {/* Header */}
-        <div className="drawer-header">
-          <div className="drawer-title">
-            <Heart size={20} className="text-danger" fill="#ff4757" />
-            <h2>Saved Wishlist</h2>
-            <span className="drawer-count-tag">{wishlistProducts.length} items</span>
-          </div>
-          <button className="icon-close-btn" onClick={onClose}>
-            <X size={18} />
+    <div className="drawer-backdrop" onClick={onClose}>
+      <aside className="drawer" aria-label="Wishlist" onClick={(e) => e.stopPropagation()}>
+        <header className="drawer-head">
+          <h2>
+            Wishlist <span>({wishlistProducts.length})</span>
+          </h2>
+          <button type="button" className="icon-btn" onClick={onClose} aria-label="Close wishlist">
+            <X size={20} strokeWidth={1.5} />
           </button>
-        </div>
+        </header>
 
-        {/* Body Items */}
         <div className="drawer-body">
           {wishlistProducts.length === 0 ? (
-            <div className="drawer-empty-state">
-              <div className="empty-icon-ring red-ring">
-                <Heart size={36} color="#ff4757" />
-              </div>
-              <h3>Your Wishlist is Empty</h3>
-              <p>Click the heart icon on any product card to save it for later!</p>
+            <div className="drawer-empty">
+              <Heart size={32} strokeWidth={1.25} />
+              <h3>Nothing saved yet</h3>
+              <p>Tap the heart on any product to keep it here for later.</p>
+              <button type="button" className="btn btn-outline btn-sm" onClick={onClose}>
+                Browse products
+              </button>
             </div>
           ) : (
-            <div className="wishlist-items-list">
+            <ul className="line-items">
               {wishlistProducts.map((product) => (
-                <div key={product.id} className="wishlist-item-card">
+                <li key={product.id} className="line-item">
                   <img
-                    src={
-                      product.imageUrl ||
-                      'https://images.unsplash.com/photo-1526738549149-8e07eca6c147?w=300'
-                    }
+                    src={product.imageUrl || PLACEHOLDER_IMAGE}
                     alt={product.name}
-                    className="wishlist-item-img"
+                    className="line-thumb"
                   />
-                  <div className="wishlist-item-info">
+                  <div className="line-info">
                     <h4>{product.name}</h4>
-                    <span className="wishlist-item-price">
-                      ₹{Number(product.price).toLocaleString('en-IN')}
-                    </span>
-                    <div className="wishlist-actions">
+                    <p className="line-price">₹{Number(product.price).toLocaleString('en-IN')}</p>
+                    <div className="line-actions">
                       <button
-                        className="btn-cyber-outline btn-xs"
+                        type="button"
+                        className="btn btn-outline btn-xs"
                         onClick={() => {
                           onAddToCart(product);
                           onRemoveFromWishlist(product.id);
                         }}
                       >
-                        <ShoppingCart size={12} />
-                        <span>Move to Cart</span>
+                        Move to Cart
                       </button>
-                      <button
-                        className="btn-cyber-solid btn-xs"
-                        onClick={() => {
-                          onBuyNow(product);
-                        }}
-                      >
-                        <Zap size={12} />
-                        <span>Buy Now</span>
+                      <button type="button" className="btn btn-dark btn-xs" onClick={() => onBuyNow(product)}>
+                        Buy Now
                       </button>
                     </div>
                   </div>
                   <button
-                    className="wishlist-remove-btn"
-                    title="Remove from Wishlist"
+                    type="button"
+                    className="icon-btn line-remove"
+                    title="Remove"
+                    aria-label={`Remove ${product.name}`}
                     onClick={() => onRemoveFromWishlist(product.id)}
                   >
-                    <Trash2 size={16} />
+                    <Trash2 size={16} strokeWidth={1.5} />
                   </button>
-                </div>
+                </li>
               ))}
-            </div>
+            </ul>
           )}
         </div>
-      </div>
+      </aside>
     </div>
   );
 }

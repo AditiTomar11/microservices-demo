@@ -1,7 +1,6 @@
 import { Link } from 'react-router-dom';
 import { useEffect, useRef, useState } from 'react';
-import ThreeCanvas from '../components/ThreeCanvas';
-import { Cpu, Server, ShieldCheck, Zap, ArrowRight, Layers, Radio, Network } from 'lucide-react';
+import { ArrowRight } from 'lucide-react';
 import './AboutPage.css';
 
 // Simple scroll-reveal hook
@@ -66,168 +65,163 @@ function Reveal({ children, className = '', delay = 0 }) {
   );
 }
 
+const SERVICES = [
+  {
+    name: 'API Gateway',
+    port: '8080',
+    text: 'Spring Cloud Gateway — the single entry point routing /products, /orders and /auth.',
+  },
+  {
+    name: 'Product Service',
+    port: '8081',
+    text: 'Owns the catalog: categories, pricing and the full specification text for every listing.',
+  },
+  {
+    name: 'Order Service',
+    port: '8082',
+    text: 'Places orders, looks products up over OpenFeign and merges repeat pending orders.',
+  },
+  {
+    name: 'Auth Service',
+    port: '8083',
+    text: 'Issues stateless JWT bearer tokens; passwords are stored as BCrypt hashes.',
+  },
+  {
+    name: 'Eureka Server',
+    port: '8761',
+    text: 'Service registry where every microservice announces itself on start-up.',
+  },
+];
+
+const VALUES = [
+  {
+    title: 'Clarity over clutter',
+    text: 'Every listing has a verified category, detailed specifications and the exact price — no hidden fees.',
+  },
+  {
+    title: 'No pay-to-rank listings',
+    text: 'Results strictly match your filters, never a sponsored position.',
+  },
+  {
+    title: 'Built for comparing',
+    text: 'Filter by category and price in real time, and open quick views without leaving the page.',
+  },
+];
+
 export default function AboutPage() {
   return (
-    <div className="about-page-3d">
-      <ThreeCanvas variant="default" />
+    <div className="page about-page">
+      {/* Intro */}
+      <section className="about-intro container">
+        <span className="eyebrow">Our Story</span>
+        <h1 className="about-title">
+          Technology shopping,
+          <br />
+          <em>without the noise.</em>
+        </h1>
+        <p className="about-lead">
+          ShopEase started with a simple frustration: buying a laptop or a phone online meant
+          wading through sponsored listings, vague specifications and prices that changed at
+          checkout. We built a store that gets out of your way — honest specs, honest prices and a
+          checkout that just works.
+        </p>
 
-      {/* Hero */}
-      <section className="about-hero-3d">
-        <div className="about-hero-content">
-          <div className="hero-badge-pill">
-            <span className="live-dot" />
-            <span>5 Reactive Microservices Behind API Gateway</span>
+        <div className="about-stats">
+          <div className="stat">
+            <Counter end={500} suffix="+" />
+            <span className="stat-label">Hardware listings</span>
           </div>
-
-          <h1 className="about-hero-title">
-            Next-Gen E-Commerce <br />
-            Built on <span className="text-gradient-3d">Spring Boot Microservices</span>
-          </h1>
-
-          <p className="about-hero-sub">
-            ShopEase is designed as a distributed, high-throughput e-commerce platform.
-            Every listing features authentic specifications, transparent pricing, and smart order merging.
-          </p>
-
-          <div className="about-stats-grid">
-            <div className="stat-card-3d glass-panel-3d">
-              <Counter end={500} suffix="+" />
-              <span className="stat-label">Hardware Listings</span>
-            </div>
-
-            <div className="stat-card-3d glass-panel-3d">
-              <Counter end={5} suffix="" />
-              <span className="stat-label">Microservices</span>
-            </div>
-
-            <div className="stat-card-3d glass-panel-3d">
-              <Counter end={100} suffix="%" />
-              <span className="stat-label">Verified Specs</span>
-            </div>
+          <div className="stat">
+            <Counter end={5} />
+            <span className="stat-label">Microservices</span>
+          </div>
+          <div className="stat">
+            <Counter end={100} suffix="%" />
+            <span className="stat-label">Verified specs</span>
           </div>
         </div>
       </section>
 
-      {/* Microservices Architecture Visualizer */}
-      <Reveal className="arch-visualizer-section">
-        <div className="section-header-3d align-center">
-          <span className="section-cyber-tag">SYSTEM BLUEPRINT</span>
-          <h2 className="section-title-3d">Microservices Topology</h2>
-          <p className="section-subtext">Service discovery, reactive routing, and Feign inter-service calls</p>
-        </div>
-
-        <div className="arch-nodes-grid">
-          <div className="arch-node-card glass-panel-3d">
-            <div className="node-icon-box"><Radio size={20} className="text-accent" /></div>
-            <div className="node-port">Port 8761</div>
-            <h3>eureka-server</h3>
-            <p>Service Registry & Discovery hub where all microservices register dynamically.</p>
-          </div>
-
-          <div className="arch-node-card glass-panel-3d highlight">
-            <div className="node-icon-box"><Network size={20} className="text-cyan" /></div>
-            <div className="node-port">Port 8080</div>
-            <h3>api-gateway</h3>
-            <p>Spring Cloud Gateway (WebFlux) entry point routing /products, /orders, /auth.</p>
-          </div>
-
-          <div className="arch-node-card glass-panel-3d">
-            <div className="node-icon-box"><Cpu size={20} className="text-accent" /></div>
-            <div className="node-port">Port 8081</div>
-            <h3>product-service</h3>
-            <p>Onion Architecture service managing catalog, categories, and full product text.</p>
-          </div>
-
-          <div className="arch-node-card glass-panel-3d">
-            <div className="node-icon-box"><Zap size={20} className="text-orange" /></div>
-            <div className="node-port">Port 8082</div>
-            <h3>order-service</h3>
-            <p>Onion Architecture order service with OpenFeign client & duplicate PENDING order merging.</p>
-          </div>
-
-          <div className="arch-node-card glass-panel-3d">
-            <div className="node-icon-box"><ShieldCheck size={20} className="text-purple" /></div>
-            <div className="node-port">Port 8083</div>
-            <h3>auth-service</h3>
-            <p>Stateless JWT authentication service issuing Bearer tokens with BCrypt credentials.</p>
-          </div>
-        </div>
-      </Reveal>
-
-      {/* Split Story */}
-      <Reveal className="about-split-3d">
-        <div className="about-split-img-box glass-panel-3d">
-          <img
-            src="https://images.unsplash.com/photo-1518770660439-4636190af475?w=1000"
-            alt="Electronics and gadgets"
-          />
-          <div className="img-shine-overlay" />
-        </div>
-
-        <div className="about-split-content">
-          <h2>What We&apos;re Building</h2>
+      {/* Split story */}
+      <Reveal className="about-split container">
+        <figure className="about-figure">
+          <img src="/about-story.jpg" alt="A laptop, headphones and a phone on a desk by a window" />
+        </figure>
+        <div className="about-copy">
+          <span className="eyebrow">What we're building</span>
+          <h2>The details that matter, before you buy.</h2>
           <p>
-            Every product on ShopEase carries the details that actually matter before you buy —
-            clear hardware specs, honest pricing, and the right category without fluff.
-            Filter by what you need, compare options side by side, and check out instantly.
+            Every product on ShopEase carries the information that actually matters — clear
+            hardware specifications, transparent pricing and the right category, without the
+            fluff. Filter by what you need, compare options side by side and check out instantly.
           </p>
           <p>
-            We eliminate sponsored listings and paid rankings. What you see matches your exact search,
-            powered by microservice speed and stateless security.
+            We eliminate sponsored listings and paid rankings. What you see matches your exact
+            search, delivered by a fast, stateless platform.
           </p>
+          <Link to="/#products" className="text-link">
+            Browse the collection <ArrowRight size={16} strokeWidth={1.5} />
+          </Link>
         </div>
       </Reveal>
 
       {/* Values */}
-      <section className="about-values-section">
-        <div className="section-header-3d">
-          <span className="section-cyber-tag">CORE PRINCIPLES</span>
-          <h2 className="section-title-3d">Platform Directives</h2>
-        </div>
+      <section className="section section-alt">
+        <div className="container">
+          <header className="section-head">
+            <span className="eyebrow">Principles</span>
+            <h2 className="section-title">What we stand for</h2>
+          </header>
 
-        <div className="about-values-grid">
-          {[
-            {
-              title: 'Clarity Over Clutter',
-              text: 'Every product listing has a verified category, detailed text specs, and exact price — no hidden fees.',
-            },
-            {
-              title: 'No Pay-To-Rank Listings',
-              text: 'Search results strictly match your selected filter criteria, not third-party sponsored positions.',
-            },
-            {
-              title: 'Built for Comparing',
-              text: 'Filter by category and price slider in real-time without refreshing or switching browser tabs.',
-            },
-          ].map((v, i) => (
-            <Reveal key={v.title} delay={i * 120}>
-              <div className="value-card-3d glass-panel-3d">
-                <div className="value-num">0{i + 1}</div>
-                <h3>{v.title}</h3>
-                <p>{v.text}</p>
-              </div>
-            </Reveal>
-          ))}
+          <div className="values-grid">
+            {VALUES.map((v, i) => (
+              <Reveal key={v.title} delay={i * 120}>
+                <div className="value">
+                  <span className="value-num">0{i + 1}</span>
+                  <h3>{v.title}</h3>
+                  <p>{v.text}</p>
+                </div>
+              </Reveal>
+            ))}
+          </div>
         </div>
       </section>
 
-      {/* CTA */}
-      <Reveal className="about-cta-section">
-        <div className="about-cta-inner glass-panel-3d">
-          <h2>Looking for Your Next High-Tech Gadget?</h2>
-          <p>Browse our catalog and experience microservice e-commerce in action.</p>
+      {/* Architecture */}
+      <Reveal className="section">
+        <div className="container">
+          <header className="section-head">
+            <span className="eyebrow">Under the hood</span>
+            <h2 className="section-title">Built on microservices</h2>
+            <p className="section-sub">
+              Five independent Spring Boot services behind one gateway, discovered through Eureka.
+            </p>
+          </header>
 
-          <div className="about-cta-actions">
-            <Link to="/#products" className="btn-cyber-solid lg-btn">
-              <span>Browse Catalog</span>
-              <ArrowRight size={16} />
-            </Link>
-            <Link to="/" className="btn-cyber-outline lg-btn">
-              <span>Return Home</span>
-            </Link>
+          <div className="services-grid">
+            {SERVICES.map((s) => (
+              <div key={s.name} className="service">
+                <span className="service-port">Port {s.port}</span>
+                <h3>{s.name}</h3>
+                <p>{s.text}</p>
+              </div>
+            ))}
           </div>
         </div>
       </Reveal>
+
+      {/* CTA */}
+      <section className="cta-band">
+        <div className="container cta-inner">
+          <div>
+            <h2>Looking for your next device?</h2>
+            <p>Browse the collection and see the platform in action.</p>
+          </div>
+          <Link to="/#products" className="btn btn-dark btn-lg">
+            Shop Now
+          </Link>
+        </div>
+      </section>
     </div>
   );
 }

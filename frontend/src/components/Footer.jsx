@@ -1,82 +1,65 @@
 import { Link } from 'react-router-dom';
-import { Cpu, ShieldCheck, Server, Radio, ArrowUp } from 'lucide-react';
+import { ArrowUp } from 'lucide-react';
 
 export default function Footer() {
+  const role = localStorage.getItem('role');
+  const token = localStorage.getItem('token');
+
   const scrollToTop = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   return (
-    <footer className="footer-3d-wrapper">
-      <div className="footer-container glass-panel-3d">
-        <div className="footer-grid">
-          {/* Brand Info */}
-          <div className="footer-brand-col">
-            <Link to="/" className="brand-logo-3d">
-              <div className="logo-icon-box">
-                <Cpu size={22} className="logo-cpu-icon" />
-              </div>
-              <span className="brand-text">
-                Shop<span className="brand-accent">Ease</span>
-              </span>
-            </Link>
-
-            <p className="footer-desc">
-              Next-generation microservices e-commerce platform built with Spring Boot,
-              Eureka Discovery, Spring Cloud Gateway, OpenFeign, JWT Auth, and React 3D Vite UI.
-            </p>
-
-            <div className="system-status-indicator">
-              <span className="status-ping" />
-              <Server size={14} />
-              <span>Gateway & Microservices Operational (Port 8080)</span>
-            </div>
-          </div>
-
-          {/* Quick Links */}
-          <div className="footer-col">
-            <h4 className="footer-col-title">Navigation</h4>
-            <ul className="footer-links">
-              <li><Link to="/">Home Dashboard</Link></li>
-              <li><a href="/#products">Product Catalog</a></li>
-              <li><Link to="/about">About Architecture</Link></li>
-              <li><Link to="/login">Account Access</Link></li>
-            </ul>
-          </div>
-
-          {/* Microservices Specs */}
-          <div className="footer-col">
-            <h4 className="footer-col-title">System Specs</h4>
-            <ul className="footer-specs">
-              <li><Radio size={12} /> eureka-server (8761)</li>
-              <li><Radio size={12} /> api-gateway (8080)</li>
-              <li><Radio size={12} /> product-service (8081)</li>
-              <li><Radio size={12} /> order-service (8082)</li>
-              <li><Radio size={12} /> auth-service (8083)</li>
-            </ul>
-          </div>
-
-          {/* Trust Badges */}
-          <div className="footer-col">
-            <h4 className="footer-col-title">Security & Protocol</h4>
-            <div className="trust-card-badge">
-              <ShieldCheck size={20} className="text-accent" />
-              <div>
-                <strong>JWT Encrypted</strong>
-                <p>Client-side decoded Bearer authentication interceptor</p>
-              </div>
-            </div>
-          </div>
+    <footer className="site-footer">
+      <div className="container footer-grid">
+        <div className="footer-brand">
+          <Link to="/" className="brand">
+            Shop<span>Ease</span>
+          </Link>
+          <p>
+            Laptops, smartphones, tablets and wearables — every listing with verified
+            specifications and transparent, tax-inclusive pricing.
+          </p>
         </div>
 
-        {/* Bottom Bar */}
-        <div className="footer-bottom-bar">
-          <p>© {new Date().getFullYear()} ShopEase. Built with Spring Boot Microservices & React Vite 3D.</p>
-          <button className="scroll-top-btn" onClick={scrollToTop} title="Back to Top">
-            <ArrowUp size={16} />
-            <span>TOP</span>
-          </button>
+        <div className="footer-col">
+          <h4>Shop</h4>
+          <ul>
+            <li><Link to={{ pathname: '/', hash: '#products' }}>All products</Link></li>
+            <li><Link to={{ pathname: '/', hash: '#categories' }}>Categories</Link></li>
+          </ul>
         </div>
+
+        <div className="footer-col">
+          <h4>Company</h4>
+          <ul>
+            <li><Link to="/about">Our Story</Link></li>
+            {role === 'ADMIN' && <li><Link to="/admin">Admin</Link></li>}
+          </ul>
+        </div>
+
+        <div className="footer-col">
+          <h4>Account</h4>
+          <ul>
+            {token ? (
+              <li><span className="footer-muted">Signed in as {localStorage.getItem('username')}</span></li>
+            ) : (
+              <>
+                <li><Link to="/login">Login</Link></li>
+                <li><Link to="/register">Create an account</Link></li>
+              </>
+            )}
+          </ul>
+        </div>
+      </div>
+
+      <div className="container footer-bottom">
+        <p>© {new Date().getFullYear()} ShopEase. All rights reserved.</p>
+        <p className="footer-muted">Built on Spring Boot microservices &amp; React.</p>
+        <button type="button" className="footer-top-btn" onClick={scrollToTop}>
+          <span>Back to top</span>
+          <ArrowUp size={14} strokeWidth={1.5} />
+        </button>
       </div>
     </footer>
   );

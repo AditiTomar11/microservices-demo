@@ -1,5 +1,6 @@
 server:
-  port: 8080
+  # Render injects PORT (10000 by default); fall back to 8080 locally.
+  port: ${PORT:8080}
 
 spring:
   application:
@@ -26,3 +27,6 @@ eureka:
   client:
     service-url:
       defaultZone: ${EUREKA_URL:http://localhost:8761/eureka}
+    # Routes above use direct URLs, not lb://, so the registry is never read here.
+    # Skipping the fetch avoids blocking startup on a sleeping Eureka server.
+    fetch-registry: false
